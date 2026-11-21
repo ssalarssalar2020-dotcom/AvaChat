@@ -1,0 +1,2808 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>آوا چت | پلتفرم چت‌روم حرفه‌ای با ورود، نقش‌ها و نظرسنجی زنده</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Vazirmatn', 'Tahoma', 'Arial', 'sans-serif'],
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Vazirmatn', Tahoma, Arial, sans-serif;
+      overflow: hidden;
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.5); }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .msg-enter { animation: fadeSlideUp 0.2s ease-out; }
+
+    @keyframes pulseHighlight {
+      0%, 100% { background-color: transparent; }
+      30%, 70% { background-color: rgba(99, 102, 241, 0.22); }
+    }
+    .highlight-msg { animation: pulseHighlight 1.6s ease-in-out; border-radius: 0.75rem; }
+
+    .typing-dot { animation: typingBounce 1.4s infinite ease-in-out both; }
+    .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+    @keyframes typingBounce {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+
+    .vip-glow { box-shadow: 0 0 18px rgba(245, 158, 11, 0.22); }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    window.NOVACHAT_SUPABASE_URL = 'https://olakqzgfkbftujyzakfs.supabase.co';
+    window.NOVACHAT_SUPABASE_KEY = 'sb_publishable_fCV276UNgHU3pNl6PHjdJg_nscL6d4B';
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 h-[100dvh] w-screen flex flex-col select-none overflow-hidden">
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed top-4 left-4 z-[70] flex flex-col gap-2 pointer-events-none max-w-xs w-full"></div>
+
+  <!-- ==================== AUTH SCREEN (REGISTER & LOGIN) ==================== -->
+  <section id="auth-screen" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.18),transparent_45%),radial-gradient(circle_at_bottom_left,rgba(245,158,11,0.12),transparent_45%)] pointer-events-none"></div>
+    <div class="relative w-full max-w-md bg-slate-900/95 border border-slate-800 rounded-3xl p-6 sm:p-7 shadow-2xl space-y-5 text-slate-100">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+            <i data-lucide="messages-square" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h1 class="font-bold text-lg">ورود به آوا چت</h1>
+            <p class="text-xs text-slate-400">چت‌روم حرفه‌ای با سطوح دسترسی پیشرفته</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Auth Tabs -->
+      <div class="grid grid-cols-2 gap-1.5 p-1 bg-slate-800/80 rounded-2xl text-xs font-semibold">
+        <button id="tab-auth-login" class="py-2.5 rounded-xl bg-indigo-600 text-white transition">ورود به حساب</button>
+        <button id="tab-auth-register" class="py-2.5 rounded-xl text-slate-400 hover:text-white transition">ثبت‌نام کاربر جدید</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="form-login" class="space-y-3.5">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">نام کاربری</label>
+          <input id="login-username" type="text" placeholder="مثلاً: admin" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 transition" required />
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">رمز عبور</label>
+          <input id="login-password" type="password" placeholder="••••" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 transition" required />
+        </div>
+        <button type="submit" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-lg shadow-indigo-600/25 transition">ورود به چت‌روم</button>
+      </form>
+
+      <!-- Register Form -->
+      <form id="form-register" class="hidden space-y-3">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">نام نمایشی</label>
+          <input id="reg-name" type="text" placeholder="مثلاً: علی رضایی" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 transition" required />
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">نام کاربری (انگلیسی)</label>
+          <input id="reg-username" type="text" placeholder="مثلاً: ali_rezaei" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 transition" required />
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">رمز عبور</label>
+          <input id="reg-password" type="password" placeholder="حداقل ۴ کاراکتر" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 transition" required />
+        </div>
+        <button type="submit" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-600/25 transition">ثبت‌نام و انتقال به صفحه ورود</button>
+      </form>
+
+      <!-- Quick Access Demo Accounts -->
+      <div class="pt-3 border-t border-slate-800 space-y-2">
+        <div class="text-[11px] text-slate-400 font-medium">ورود سریع برای تست نقش‌ها:</div>
+        <div class="grid grid-cols-3 gap-2 text-[11px]">
+          <button id="btn-quick-superadmin" type="button" class="p-2 rounded-xl bg-gradient-to-l from-rose-500/20 to-amber-500/20 border border-amber-500/30 hover:border-amber-400 text-amber-300 font-semibold transition">👑 مدیر اصلی (شما)</button>
+          <button id="btn-quick-mod" type="button" class="p-2 rounded-xl bg-sky-500/15 border border-sky-500/30 hover:border-sky-400 text-sky-300 font-semibold transition">🛡️ مدیر معمولی</button>
+          <button id="btn-quick-vip" type="button" class="p-2 rounded-xl bg-amber-500/10 border border-amber-500/25 hover:border-amber-400 text-amber-200 font-semibold transition">💎 عضو VIP</button>
+        </div>
+        <p class="text-[10px] text-slate-500 text-center">حساب مدیر اصلی: نام کاربری <code class="text-slate-300">admin</code> / رمز <code class="text-slate-300">1234</code></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== MAIN APP SHELL ==================== -->
+  <div id="app-shell" class="hidden flex-1 h-full overflow-hidden relative">
+
+    <!-- Mobile Backdrop -->
+    <div id="sidebar-backdrop" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden backdrop-blur-sm"></div>
+
+    <!-- LEFT SIDEBAR -->
+    <aside id="left-sidebar" class="fixed lg:static inset-y-0 right-0 z-40 w-72 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col transition-transform duration-200 translate-x-full lg:translate-x-0 shrink-0">
+      <!-- Workspace Header -->
+      <div class="h-16 px-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 shrink-0">
+            <i data-lucide="messages-square" class="w-5 h-5"></i>
+          </div>
+          <div class="min-w-0">
+            <h2 class="font-bold text-sm truncate">آوا چت</h2>
+            <p class="text-[11px] text-emerald-500 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
+              <span id="online-count-label">۵ نفر آنلاین</span>
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-1">
+          <button id="btn-theme-toggle" title="تغییر تم روشن/تاریک" class="p-2 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+            <i data-lucide="sun" id="theme-icon-sun" class="w-4 h-4 hidden dark:block"></i>
+            <i data-lucide="moon" id="theme-icon-moon" class="w-4 h-4 block dark:hidden"></i>
+          </button>
+          <button id="btn-close-left" class="lg:hidden p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Super Admin Control Center Button (Visible ONLY to Super Admin) -->
+      <div id="superadmin-panel-btn-wrap" class="hidden px-3 pt-3 shrink-0">
+        <button id="btn-open-admin-panel" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-gradient-to-l from-rose-500/15 to-indigo-500/15 border border-rose-500/30 hover:border-rose-400/60 transition">
+          <div class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-gradient-to-br from-rose-500 to-amber-500 text-white flex items-center justify-center shadow-sm">
+              <i data-lucide="shield-check" class="w-4 h-4"></i>
+            </span>
+            <div class="text-right">
+              <div class="text-xs font-bold text-rose-500 dark:text-rose-400">پنل مدیریت کل</div>
+              <div class="text-[10px] text-slate-500 dark:text-slate-400">قفل اتاق، اسلومود و تنظیمات</div>
+            </div>
+          </div>
+          <i data-lucide="sliders" class="w-4 h-4 text-rose-400"></i>
+        </button>
+      </div>
+
+      <!-- VIP Club Banner Button -->
+      <div class="px-3 pt-2.5 shrink-0">
+        <button id="btn-open-vip" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-gradient-to-l from-amber-500/15 via-yellow-500/10 to-orange-500/15 border border-amber-500/30 hover:border-amber-400/60 transition group">
+          <div class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 text-white flex items-center justify-center shadow-sm">
+              <i data-lucide="crown" class="w-4 h-4"></i>
+            </span>
+            <div class="text-right">
+              <div class="text-xs font-bold text-amber-600 dark:text-amber-400">بخش ویژه VIP</div>
+              <div id="vip-sidebar-sub" class="text-[10px] text-slate-500 dark:text-slate-400">امکانات اختصاصی و نشان طلایی</div>
+            </div>
+          </div>
+          <i data-lucide="chevron-left" class="w-4 h-4 text-amber-500 group-hover:-translate-x-0.5 transition"></i>
+        </button>
+      </div>
+
+      <!-- Search Rooms -->
+      <div class="p-3 shrink-0">
+        <div class="relative">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          <input id="room-search-input" type="text" placeholder="جستجوی کانال یا کاربر..." class="w-full bg-slate-100 dark:bg-slate-800/80 text-xs rounded-xl pr-9 pl-3 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500/50 transition placeholder:text-slate-400" />
+        </div>
+      </div>
+
+      <!-- Channels & DMs List -->
+      <div class="flex-1 overflow-y-auto px-2.5 space-y-5 pb-4">
+        <div>
+          <div class="flex items-center justify-between px-2 mb-1.5">
+            <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">کانال‌های گفتگو</span>
+            <button id="btn-new-channel" title="ساخت کانال جدید (ویژه مدیر اصلی)" class="hidden p-1 rounded-md text-slate-500 hover:text-indigo-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <div id="channel-list" class="space-y-0.5"></div>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between px-2 mb-1.5">
+            <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">پیام‌های مستقیم</span>
+          </div>
+          <div id="dm-list" class="space-y-0.5"></div>
+        </div>
+      </div>
+
+      <!-- Current User Profile Footer + Logout -->
+      <div class="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/90 shrink-0 flex items-center gap-1.5">
+        <button id="btn-open-profile" class="flex-1 flex items-center justify-between p-2 rounded-xl hover:bg-slate-200/60 dark:hover:bg-slate-800 transition text-right min-w-0">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div class="relative shrink-0">
+              <div id="me-avatar" class="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-500 to-cyan-500 flex items-center justify-center text-white font-bold text-xs"></div>
+              <span id="me-status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900 absolute bottom-0 right-0"></span>
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span id="me-name" class="text-xs font-semibold truncate">کاربر</span>
+                <span id="me-role-badge"></span>
+              </div>
+              <div id="me-status-text" class="text-[11px] text-slate-500 dark:text-slate-400 truncate">آنلاین</div>
+            </div>
+          </div>
+          <i data-lucide="settings" class="w-4 h-4 text-slate-400 shrink-0"></i>
+        </button>
+        <button id="btn-logout" title="خروج از حساب" class="p-2.5 rounded-xl text-rose-500 hover:bg-rose-500/10 transition shrink-0">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </aside>
+
+    <!-- CENTER: Active Chat Area -->
+    <main class="flex-1 flex flex-col min-w-0 bg-white dark:bg-slate-950 h-full">
+      <!-- Chat Header -->
+      <header class="h-14 px-3 sm:px-4 bg-[#2b2d31] text-white border-b border-slate-700/60 flex items-center justify-between gap-2 shrink-0">
+        <div class="flex items-center gap-3 min-w-0">
+          <button id="btn-open-left" class="lg:hidden p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0">
+            <i data-lucide="menu" class="w-5 h-5"></i>
+          </button>
+          <div id="active-room-icon" class="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0 font-bold">#</div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h2 id="active-room-title" class="font-bold text-sm truncate">عمومی</h2>
+              <span id="active-room-badge" class="hidden text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-500 font-medium"></span>
+              <span id="room-lock-badge" class="hidden text-[10px] px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-500 font-medium">🔒 قفل‌شده</span>
+              <span id="room-slow-badge" class="hidden text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-500 font-medium">🐢 اسلومود ۵ث</span>
+            </div>
+            <p id="active-room-desc" class="text-[11px] text-slate-300 truncate"></p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1 shrink-0">
+          <button id="btn-start-voice-call" title="شروع تماس صوتی" class="p-2 rounded-lg text-emerald-500 hover:bg-emerald-500/10 transition">
+            <i data-lucide="phone-call" class="w-4 h-4"></i>
+          </button>
+          <button id="btn-mobile-preview" title="تغییر نمای گوشی / دسکتاپ" class="hidden sm:inline-flex p-2 rounded-lg text-slate-500 hover:text-indigo-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+            <i data-lucide="smartphone" class="w-4 h-4"></i>
+          </button>
+          <button id="btn-header-vip" title="امکانات VIP" class="p-2 rounded-lg text-amber-500 hover:bg-amber-500/10 transition">
+            <i data-lucide="crown" class="w-4 h-4"></i>
+          </button>
+          <button id="btn-toggle-msg-search" title="جستجو در پیام‌ها" class="p-2 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+            <i data-lucide="search" class="w-4 h-4"></i>
+          </button>
+          <button id="btn-sound-toggle" title="صدای اعلان پیام" class="p-2 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+            <i data-lucide="volume-2" id="icon-sound-on" class="w-4 h-4"></i>
+            <i data-lucide="volume-x" id="icon-sound-off" class="w-4 h-4 hidden text-rose-500"></i>
+          </button>
+          <button id="btn-toggle-right" title="اطلاعات اتاق و اعضا" class="p-2 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+            <i data-lucide="panel-left" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Message Search Bar -->
+      <div id="msg-search-bar" class="hidden px-4 py-2 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2 shrink-0">
+        <i data-lucide="search" class="w-4 h-4 text-slate-400 shrink-0"></i>
+        <input id="msg-search-input" type="text" placeholder="جستجو در متن پیام‌های این اتاق..." class="flex-1 bg-transparent text-xs outline-none" />
+        <span id="msg-search-count" class="text-[11px] text-slate-400"></span>
+        <button id="btn-close-msg-search" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Pinned Message Banner -->
+      <div id="pinned-banner" class="hidden px-4 py-2 bg-indigo-50 dark:bg-indigo-950/40 border-b border-indigo-200/70 dark:border-indigo-900/50 flex items-center justify-between gap-2 shrink-0">
+        <button id="btn-jump-pinned" class="flex items-center gap-2 min-w-0 text-right flex-1">
+          <i data-lucide="pin" class="w-3.5 h-3.5 text-indigo-500 shrink-0"></i>
+          <div class="min-w-0">
+            <span class="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">پیام سنجاق‌شده: </span>
+            <span id="pinned-preview-text" class="text-xs text-slate-700 dark:text-slate-300 truncate"></span>
+          </div>
+        </button>
+        <button id="btn-unpin-banner" title="برداشتن سنجاق (ویژه مدیر اصلی)" class="hidden p-1 rounded hover:bg-indigo-200/50 dark:hover:bg-indigo-900/50 text-indigo-500 shrink-0">
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+
+      <!-- Messages Feed -->
+      <div id="messages-container" class="flex-1 overflow-y-auto px-4 py-4 space-y-3 select-text"></div>
+
+      <!-- Typing Indicator -->
+      <div id="typing-indicator" class="hidden px-5 py-1.5 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 shrink-0">
+        <div class="flex items-center gap-1 bg-slate-200/80 dark:bg-slate-800 px-2.5 py-1.5 rounded-full">
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 typing-dot"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 typing-dot"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 typing-dot"></span>
+        </div>
+        <span id="typing-text">در حال نوشتن...</span>
+      </div>
+
+      <!-- Composer Area -->
+      <footer class="p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shrink-0 relative">
+        <div id="composer-context-bar" class="hidden mb-2 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/90 border-r-4 border-indigo-500 flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <div id="composer-context-label" class="text-[11px] font-semibold text-indigo-500">پاسخ</div>
+            <div id="composer-context-text" class="text-xs text-slate-600 dark:text-slate-300 truncate"></div>
+          </div>
+          <button id="btn-cancel-context" class="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 shrink-0">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <div id="attachment-preview-bar" class="hidden mb-2 px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/90 flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <img id="attachment-thumb" class="hidden w-10 h-10 rounded-lg object-cover border border-slate-300 dark:border-slate-700" alt="پیش‌نمایش" />
+            <div id="attachment-file-icon" class="w-9 h-9 rounded-lg bg-indigo-500/15 text-indigo-500 flex items-center justify-center shrink-0">
+              <i data-lucide="file" class="w-4 h-4"></i>
+            </div>
+            <div class="min-w-0">
+              <div id="attachment-name" class="text-xs font-medium truncate">file.png</div>
+              <div id="attachment-size" class="text-[10px] text-slate-400">120 KB</div>
+            </div>
+          </div>
+          <button id="btn-remove-attachment" class="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 shrink-0">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Emoji Picker Popover -->
+        <div id="emoji-picker" class="hidden absolute bottom-20 right-4 z-30 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl p-2.5 w-64 space-y-2">
+          <div>
+            <div class="text-[11px] font-semibold text-slate-400 mb-1.5 px-1">ایموجی‌های پرکاربرد</div>
+            <div id="emoji-grid" class="grid grid-cols-6 gap-1 text-lg"></div>
+          </div>
+          <div class="border-t border-slate-200 dark:border-slate-700 pt-2">
+            <div class="flex items-center justify-between px-1 mb-1">
+              <span class="text-[11px] font-semibold text-amber-500 flex items-center gap-1"><i data-lucide="crown" class="w-3 h-3"></i>ایموجی‌های VIP</span>
+              <span id="vip-emoji-lock-label" class="text-[10px] text-slate-400"></span>
+            </div>
+            <div id="vip-emoji-grid" class="grid grid-cols-6 gap-1 text-lg"></div>
+          </div>
+        </div>
+
+        <!-- Input Row -->
+        <div class="flex items-end gap-1.5 bg-slate-100 dark:bg-slate-800/90 rounded-2xl px-2.5 py-2 focus-within:ring-2 focus-within:ring-indigo-500/50 transition">
+          <input type="file" id="file-input" class="hidden" />
+          <button id="btn-attach" title="پیوست فایل یا تصویر" class="p-2 rounded-xl text-slate-500 hover:text-indigo-500 hover:bg-slate-200/60 dark:hover:bg-slate-700 transition shrink-0">
+            <i data-lucide="paperclip" class="w-4 h-4"></i>
+          </button>
+          <button id="btn-emoji" title="درج ایموجی" class="p-2 rounded-xl text-slate-500 hover:text-amber-500 hover:bg-slate-200/60 dark:hover:bg-slate-700 transition shrink-0">
+            <i data-lucide="smile" class="w-4 h-4"></i>
+          </button>
+          <button id="btn-open-poll" title="ساخت نظرسنجی زنده" class="p-2 rounded-xl text-slate-500 hover:text-emerald-500 hover:bg-slate-200/60 dark:hover:bg-slate-700 transition shrink-0">
+            <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+          </button>
+          <button id="btn-voice-msg" title="ارسال پیام صوتی" class="p-2 rounded-xl text-slate-500 hover:text-rose-500 hover:bg-slate-200/60 dark:hover:bg-slate-700 transition shrink-0">
+            <i data-lucide="mic" class="w-4 h-4"></i>
+          </button>
+          <button id="btn-vip-shout" title="پیام ویژه طلایی (VIP / مدیر اصلی)" class="p-2 rounded-xl text-slate-400 hover:text-amber-500 hover:bg-amber-500/10 transition shrink-0">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+          </button>
+
+          <textarea id="message-input" rows="1" placeholder="پیام خود را بنویسید... (Enter برای ارسال)" class="flex-1 bg-transparent text-sm outline-none resize-none max-h-32 py-1.5 leading-relaxed placeholder:text-slate-400"></textarea>
+
+          <button id="btn-send" title="ارسال پیام" class="p-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white transition shadow-md shadow-indigo-600/20 shrink-0">
+            <i data-lucide="send-horizontal" class="w-4 h-4 rotate-180"></i>
+          </button>
+        </div>
+      </footer>
+
+      <!-- Mobile Bottom Navigation Bar -->
+      <nav id="mobile-bottom-nav" class="lg:hidden grid grid-cols-4 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shrink-0 text-[11px] font-medium">
+        <button id="mnav-chat" class="flex flex-col items-center justify-center py-2 text-indigo-500">
+          <i data-lucide="message-square" class="w-4 h-4 mb-0.5"></i>
+          <span>گفتگو</span>
+        </button>
+        <button id="mnav-rooms" class="flex flex-col items-center justify-center py-2 text-slate-500 dark:text-slate-400">
+          <i data-lucide="hash" class="w-4 h-4 mb-0.5"></i>
+          <span>کانال‌ها</span>
+        </button>
+        <button id="mnav-members" class="flex flex-col items-center justify-center py-2 text-slate-500 dark:text-slate-400">
+          <i data-lucide="users" class="w-4 h-4 mb-0.5"></i>
+          <span>اعضا</span>
+        </button>
+        <button id="mnav-vip" class="flex flex-col items-center justify-center py-2 text-amber-500">
+          <i data-lucide="crown" class="w-4 h-4 mb-0.5"></i>
+          <span>VIP</span>
+        </button>
+      </nav>
+    </main>
+
+    <!-- RIGHT SIDEBAR -->
+    <aside id="right-sidebar" class="hidden xl:flex fixed xl:static inset-y-0 left-0 z-40 w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex-col shrink-0">
+      <div class="h-16 px-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+        <span class="font-bold text-sm">جزئیات اتاق و آمار</span>
+        <button id="btn-close-right" class="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-3 gap-1 p-2 border-b border-slate-200 dark:border-slate-800 text-xs shrink-0">
+        <button data-rtab="members" class="rtab-btn py-1.5 rounded-lg font-medium bg-indigo-500/10 text-indigo-500 transition">اعضا</button>
+        <button data-rtab="pinned" class="rtab-btn py-1.5 rounded-lg font-medium text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition">سنجاق‌ها</button>
+        <button data-rtab="files" class="rtab-btn py-1.5 rounded-lg font-medium text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition">فایل‌ها</button>
+      </div>
+
+      <div id="right-panel-content" class="flex-1 overflow-y-auto p-3 space-y-2.5"></div>
+    </aside>
+  </div>
+
+  <!-- ==================== VOICE CALL OVERLAY ==================== -->
+  <div id="voice-call-modal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/70 backdrop-blur-md p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-sm p-6 shadow-2xl text-center text-white space-y-5 relative overflow-hidden">
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.18),transparent_60%)] pointer-events-none"></div>
+      <div class="relative flex flex-col items-center space-y-3">
+        <div class="relative">
+          <div id="vc-pulse-ring" class="absolute -inset-2 rounded-full border-2 border-emerald-400/60 animate-ping"></div>
+          <div id="vc-avatar" class="w-20 h-20 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500 flex items-center justify-center text-2xl font-bold shadow-lg overflow-hidden relative z-10"></div>
+        </div>
+        <div>
+          <h3 id="vc-title" class="font-bold text-base">تماس صوتی</h3>
+          <p id="vc-status" class="text-xs text-emerald-400 mt-0.5">در حال برقراری ارتباط...</p>
+          <div id="vc-timer" class="text-sm font-mono text-slate-300 mt-1">00:00</div>
+        </div>
+      </div>
+
+      <!-- Simulated Audio Waveform -->
+      <div class="flex items-center justify-center gap-1 h-8">
+        <span class="w-1 bg-emerald-400 rounded-full animate-pulse h-3"></span>
+        <span class="w-1 bg-emerald-400 rounded-full animate-pulse h-6"></span>
+        <span class="w-1 bg-emerald-400 rounded-full animate-pulse h-4"></span>
+        <span class="w-1 bg-emerald-400 rounded-full animate-pulse h-7"></span>
+        <span class="w-1 bg-emerald-400 rounded-full animate-pulse h-3"></span>
+        <span class="w-1 bg-emerald-400 rounded-full animate-pulse h-5"></span>
+      </div>
+
+      <div class="flex items-center justify-center gap-4 pt-2 relative z-10">
+        <button id="btn-vc-mute" title="قطع/وصل میکروفون" class="w-12 h-12 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center transition border border-slate-700">
+          <i data-lucide="mic" id="vc-mic-on" class="w-5 h-5 text-white"></i>
+          <i data-lucide="mic-off" id="vc-mic-off" class="w-5 h-5 text-rose-400 hidden"></i>
+        </button>
+        <button id="btn-vc-end" title="پایان تماس" class="w-14 h-14 rounded-full bg-rose-600 hover:bg-rose-500 flex items-center justify-center transition shadow-lg shadow-rose-600/30">
+          <i data-lucide="phone-off" class="w-6 h-6 text-white"></i>
+        </button>
+        <button id="btn-vc-speaker" title="بلندگو" class="w-12 h-12 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center transition border border-slate-700">
+          <i data-lucide="volume-2" id="vc-spk-on" class="w-5 h-5 text-emerald-400"></i>
+          <i data-lucide="volume-x" id="vc-spk-off" class="w-5 h-5 text-slate-400 hidden"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Super Admin Control Panel -->
+  <div id="modal-admin-panel" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/65 backdrop-blur-sm p-4">
+    <div class="bg-white dark:bg-slate-900 border border-rose-500/40 rounded-2xl w-full max-w-lg max-h-[90dvh] flex flex-col p-5 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="shield-check" class="w-5 h-5 text-rose-500"></i>
+          <h3 class="font-bold text-base">پنل مدیریت کل (فقط مدیر اصلی)</h3>
+        </div>
+        <button id="btn-close-admin-panel" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div class="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs font-semibold shrink-0">
+        <button id="tab-admin-users" class="py-2 rounded-lg bg-rose-600 text-white transition">مدیریت کاربران</button>
+        <button id="tab-admin-room" class="py-2 rounded-lg text-slate-500 dark:text-slate-300 transition">تنظیمات اتاق</button>
+      </div>
+
+      <!-- Tab: User Management -->
+      <div id="admin-tab-users-body" class="flex-1 overflow-y-auto space-y-3 text-xs pr-1">
+        <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/80 space-y-2">
+          <div class="font-bold text-emerald-500">➕ افزودن کاربر جدید</div>
+          <div class="grid grid-cols-2 gap-2">
+            <input id="admin-add-name" type="text" placeholder="نام نمایشی" class="bg-white dark:bg-slate-900 rounded-lg px-2.5 py-2 outline-none border border-slate-300 dark:border-slate-700" />
+            <input id="admin-add-username" type="text" placeholder="نام کاربری" class="bg-white dark:bg-slate-900 rounded-lg px-2.5 py-2 outline-none border border-slate-300 dark:border-slate-700" />
+            <input id="admin-add-password" type="text" placeholder="رمز عبور" class="bg-white dark:bg-slate-900 rounded-lg px-2.5 py-2 outline-none border border-slate-300 dark:border-slate-700" />
+            <select id="admin-add-role" class="bg-white dark:bg-slate-900 rounded-lg px-2.5 py-2 outline-none border border-slate-300 dark:border-slate-700">
+              <option value="member">کاربر عادی</option>
+              <option value="vip">عضو VIP</option>
+              <option value="admin">مدیر معمولی</option>
+            </select>
+          </div>
+          <button id="btn-admin-create-user" class="w-full py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition">ایجاد کاربر</button>
+        </div>
+        <div class="space-y-1.5">
+          <div class="font-bold text-slate-400">لیست کاربران و مدیریت نقش‌ها</div>
+          <div id="admin-users-list" class="space-y-1.5"></div>
+        </div>
+      </div>
+
+      <!-- Tab: Room Settings -->
+      <div id="admin-tab-room-body" class="hidden space-y-3 text-xs">
+        <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/80 flex items-center justify-between">
+          <div>
+            <div class="font-bold">قفل کردن اتاق فعلی</div>
+            <div class="text-[11px] text-slate-400">در حالت قفل فقط مدیر اصلی می‌تواند پیام بفرستد</div>
+          </div>
+          <button id="btn-toggle-room-lock" class="px-3 py-1.5 rounded-lg font-bold bg-indigo-600 text-white">تغییر وضعیت</button>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/80 flex items-center justify-between">
+          <div>
+            <div class="font-bold">حالت آهسته (Slow Mode)</div>
+            <div class="text-[11px] text-slate-400">محدودیت ارسال هر ۵ ثانیه یک پیام برای اعضا</div>
+          </div>
+          <button id="btn-toggle-slow-mode" class="px-3 py-1.5 rounded-lg font-bold bg-amber-600 text-white">تغییر وضعیت</button>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/80 space-y-2">
+          <div class="font-bold">ویرایش عنوان و توضیحات اتاق فعلی</div>
+          <input id="admin-edit-room-name" type="text" class="w-full bg-white dark:bg-slate-900 rounded-lg px-3 py-2 outline-none border border-slate-300 dark:border-slate-700" placeholder="نام اتاق" />
+          <input id="admin-edit-room-desc" type="text" class="w-full bg-white dark:bg-slate-900 rounded-lg px-3 py-2 outline-none border border-slate-300 dark:border-slate-700" placeholder="توضیحات اتاق" />
+          <div class="flex justify-between pt-1">
+            <button id="btn-admin-delete-room" class="px-3 py-1.5 rounded-lg bg-rose-600/15 text-rose-500 hover:bg-rose-600/25 font-bold">حذف این کانال</button>
+            <button id="btn-admin-save-room" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold">ذخیره تغییرات اتاق</button>
+          </div>
+        </div>
+        <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-2">
+          <div class="font-bold text-emerald-500">🔗 اتصال زنده به دیتابیس Supabase</div>
+          <input id="admin-sb-url" type="url" dir="ltr" placeholder="https://xxxxx.supabase.co" class="w-full bg-white dark:bg-slate-900 rounded-lg px-3 py-2 outline-none border border-emerald-500/30 text-left" />
+          <div class="flex items-center justify-between">
+            <span id="sb-conn-status" class="text-[10px] text-emerald-500 font-semibold">متصل به Supabase ✅</span>
+            <button id="btn-admin-connect-sb" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold">اتصال و همگام‌سازی</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Live Poll Creator -->
+  <div id="modal-poll" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md p-5 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-base">ساخت نظرسنجی زنده</h3>
+        <button id="btn-close-poll" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div class="space-y-2.5 text-xs">
+        <input id="poll-question" type="text" placeholder="سوال نظرسنجی را بنویسید..." class="w-full bg-slate-100 dark:bg-slate-800 rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500" />
+        <input id="poll-opt-1" type="text" placeholder="گزینه اول" class="w-full bg-slate-100 dark:bg-slate-800 rounded-xl px-3 py-2 outline-none" />
+        <input id="poll-opt-2" type="text" placeholder="گزینه دوم" class="w-full bg-slate-100 dark:bg-slate-800 rounded-xl px-3 py-2 outline-none" />
+        <input id="poll-opt-3" type="text" placeholder="گزینه سوم (اختیاری)" class="w-full bg-slate-100 dark:bg-slate-800 rounded-xl px-3 py-2 outline-none" />
+      </div>
+      <div class="flex justify-end gap-2">
+        <button id="btn-cancel-poll" class="px-4 py-2 rounded-xl text-xs text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">انصراف</button>
+        <button id="btn-submit-poll" class="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white">ارسال نظرسنجی</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: New Channel (Super Admin Only) -->
+  <div id="modal-new-channel" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md p-5 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-base">ساخت کانال جدید</h3>
+        <button id="btn-close-modal-channel" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">نام کانال</label>
+          <input id="input-channel-name" type="text" placeholder="مثلاً: بازاریابی-و-فروش" class="w-full bg-slate-100 dark:bg-slate-800 rounded-xl px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">توضیحات کوتاه</label>
+          <input id="input-channel-desc" type="text" placeholder="موضوع گفتگو در این کانال..." class="w-full bg-slate-100 dark:bg-slate-800 rounded-xl px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button id="btn-cancel-channel" class="px-4 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">انصراف</button>
+        <button id="btn-create-channel" class="px-4 py-2 rounded-xl text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white">ایجاد کانال</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: My Profile (Photo + Role-Based Options) -->
+  <div id="modal-profile" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md max-h-[90dvh] flex flex-col p-5 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2">
+          <h3 class="font-bold text-base">پروفایل و شخصی‌سازی</h3>
+          <span id="profile-modal-role-badge"></span>
+        </div>
+        <button id="btn-close-modal-profile" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto space-y-3 text-xs pr-1">
+        <!-- Photo Upload -->
+        <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-100 dark:bg-slate-800/80">
+          <div id="profile-preview-avatar" class="w-14 h-14 rounded-full bg-gradient-to-tr from-indigo-500 to-cyan-500 flex items-center justify-center text-white font-bold text-lg overflow-hidden shrink-0"></div>
+          <div class="space-y-1.5 flex-1">
+            <div class="font-semibold">تصویر پروفایل</div>
+            <div class="flex items-center gap-2">
+              <input id="input-profile-photo" type="file" accept="image/*" class="hidden" />
+              <button id="btn-upload-photo" type="button" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium">انتخاب عکس</button>
+              <button id="btn-remove-photo" type="button" class="px-2.5 py-1.5 rounded-lg bg-rose-500/15 text-rose-500 font-medium">حذف عکس</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Basic Options (All Users) -->
+        <div>
+          <label class="block font-medium text-slate-500 dark:text-slate-400 mb-1">نام نمایشی</label>
+          <input id="input-profile-name" type="text" class="w-full bg-slate-100 dark:bg-slate-800 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
+        </div>
+        <div>
+          <label class="block font-medium text-slate-500 dark:text-slate-400 mb-1">بیوگرافی کوتاه</label>
+          <input id="input-profile-bio" type="text" class="w-full bg-slate-100 dark:bg-slate-800 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-medium text-slate-500 dark:text-slate-400 mb-1">وضعیت حضور</label>
+            <select id="input-profile-status" class="w-full bg-slate-100 dark:bg-slate-800 rounded-xl px-3 py-2 outline-none">
+              <option value="online">آنلاین</option>
+              <option value="away">مشغول</option>
+              <option value="dnd">مزاحم نشوید</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-medium text-slate-500 dark:text-slate-400 mb-1">تم رنگی آواتار</label>
+            <select id="input-profile-color" class="w-full bg-slate-100 dark:bg-slate-800 rounded-xl px-3 py-2 outline-none">
+              <option value="from-indigo-500 to-cyan-500">آبی نیلی</option>
+              <option value="from-emerald-500 to-teal-500">سبز زمردی</option>
+              <option value="from-rose-500 to-pink-500">صورتی مرجانی</option>
+              <option value="from-amber-500 to-rose-600">طلایی آتشین</option>
+              <option value="from-violet-500 to-fuchsia-500">بنفش نئونی</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- VIP & Super Admin Exclusive Options -->
+        <div id="profile-vip-options" class="hidden p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-2">
+          <div class="font-bold text-amber-500 flex items-center gap-1"><i data-lucide="crown" class="w-3.5 h-3.5"></i>آپشن‌های ویژه سطح VIP و مدیر اصلی</div>
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">وضعیت سفارشی (Custom Status)</label>
+            <input id="input-profile-custom-status" type="text" placeholder="مثلاً: در حال طراحی سیستم ✨" class="w-full bg-white dark:bg-slate-900 rounded-lg px-2.5 py-1.5 outline-none border border-amber-500/30" />
+          </div>
+          <label class="flex items-center justify-between cursor-pointer pt-1">
+            <span>قاب طلایی درخشان دور پروفایل</span>
+            <input id="input-profile-vip-frame" type="checkbox" class="accent-amber-500 w-4 h-4" />
+          </label>
+        </div>
+
+        <!-- Moderator & Super Admin Exclusive Options -->
+        <div id="profile-mod-options" class="hidden p-3 rounded-xl bg-sky-500/10 border border-sky-500/30 space-y-2">
+          <div class="font-bold text-sky-500 flex items-center gap-1"><i data-lucide="shield" class="w-3.5 h-3.5"></i>تنظیمات سطح مدیریتی</div>
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">عنوان / سمت نمایشی</label>
+            <input id="input-profile-title" type="text" class="w-full bg-white dark:bg-slate-900 rounded-lg px-2.5 py-1.5 outline-none border border-sky-500/30" />
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800 shrink-0">
+        <button id="btn-cancel-profile" class="px-4 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">بستن</button>
+        <button id="btn-save-profile" class="px-4 py-2 rounded-xl text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white">ذخیره تغییرات</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: User Card & Role/Mute Management -->
+  <div id="modal-user-card" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-sm p-5 shadow-2xl space-y-4">
+      <div class="flex items-start justify-between">
+        <div class="flex items-center gap-3">
+          <div id="uc-avatar" class="w-12 h-12 rounded-full bg-gradient-to-tr from-indigo-500 to-cyan-500 flex items-center justify-center text-white font-bold text-base"></div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <h3 id="uc-name" class="font-bold text-sm">نام کاربر</h3>
+              <span id="uc-badge"></span>
+            </div>
+            <div id="uc-title" class="text-[11px] text-slate-500 dark:text-slate-400">سمت</div>
+          </div>
+        </div>
+        <button id="btn-close-user-card" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <p id="uc-bio" class="text-xs text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/70 p-3 rounded-xl leading-relaxed"></p>
+      <div class="grid grid-cols-2 gap-2 text-center text-xs">
+        <div class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/60">
+          <div id="uc-msg-count" class="font-bold text-indigo-500 text-sm">0</div>
+          <div class="text-[10px] text-slate-400">پیام ارسالی</div>
+        </div>
+        <div class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/60">
+          <div id="uc-status-label" class="font-bold text-emerald-500 text-sm">آنلاین</div>
+          <div class="text-[10px] text-slate-400">وضعیت فعلی</div>
+        </div>
+      </div>
+      <div id="uc-admin-controls" class="hidden border-t border-slate-200 dark:border-slate-800 pt-3 space-y-2">
+        <div id="uc-admin-title" class="text-[11px] font-semibold text-slate-400">مدیریت کاربر</div>
+        <div id="uc-superadmin-only-btns" class="hidden grid grid-cols-2 gap-2">
+          <button id="btn-uc-role-admin" class="px-2.5 py-2 rounded-xl text-[11px] font-medium bg-sky-500/10 text-sky-500 hover:bg-sky-500/20 transition">ارتقا / لغو مدیر</button>
+          <button id="btn-uc-role-vip" class="px-2.5 py-2 rounded-xl text-[11px] font-medium bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 transition">اعطا / لغو VIP</button>
+          <button id="btn-uc-delete-user" class="col-span-2 px-2.5 py-2 rounded-xl text-[11px] font-bold bg-rose-600/15 text-rose-500 hover:bg-rose-600/25 transition">🗑️ حذف کامل این کاربر</button>
+        </div>
+        <button id="btn-uc-mute" class="w-full px-3 py-2 rounded-xl text-[11px] font-medium bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 transition">سکوت / رفع سکوت کاربر</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: VIP Club -->
+  <div id="modal-vip" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/65 backdrop-blur-sm p-4">
+    <div class="bg-white dark:bg-slate-900 border border-amber-500/40 rounded-2xl w-full max-w-md p-5 shadow-2xl vip-glow space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white flex items-center justify-center">
+            <i data-lucide="crown" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-base text-amber-500">باشگاه ویژه VIP آوا چت</h3>
+            <p class="text-[11px] text-slate-400">امکانات اختصاصی برای اعضای ویژه و مدیر اصلی</p>
+          </div>
+        </div>
+        <button id="btn-close-vip" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div class="space-y-2 text-xs">
+        <div class="flex items-center gap-2.5 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20">
+          <i data-lucide="sparkles" class="w-4 h-4 text-amber-500 shrink-0"></i>
+          <span>ارسال <strong>پیام ویژه طلایی</strong> با حاشیه درخشان</span>
+        </div>
+        <div class="flex items-center gap-2.5 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20">
+          <i data-lucide="smile-plus" class="w-4 h-4 text-amber-500 shrink-0"></i>
+          <span>دسترسی به <strong>ایموجی‌های اختصاصی VIP</strong> (👑 💎 🌟 🏆 🛸 ⚡)</span>
+        </div>
+        <div class="flex items-center gap-2.5 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20">
+          <i data-lucide="hard-drive-upload" class="w-4 h-4 text-amber-500 shrink-0"></i>
+          <span>افزایش سقف آپلود فایل از ۲ مگابایت به <strong>۱۰ مگابایت</strong></span>
+        </div>
+        <div class="flex items-center gap-2.5 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20">
+          <i data-lucide="lock-open" class="w-4 h-4 text-amber-500 shrink-0"></i>
+          <span>دسترسی کامل به کانال اختصاصی <strong>#سالن-VIP</strong></span>
+        </div>
+      </div>
+      <div class="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-800">
+        <span id="vip-modal-status" class="text-xs font-medium text-slate-500"></span>
+        <button id="btn-ok-vip" class="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-l from-amber-500 to-orange-500 text-white shadow-md">متوجه شدم</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Confirm Delete -->
+  <div id="modal-confirm-delete" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-sm p-5 shadow-2xl space-y-4">
+      <h3 class="font-bold text-base text-rose-500">حذف پیام</h3>
+      <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">آیا مطمئن هستید که می‌خواهید این پیام را حذف کنید؟</p>
+      <div class="flex justify-end gap-2 pt-1">
+        <button id="btn-cancel-delete" class="px-4 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">انصراف</button>
+        <button id="btn-confirm-delete" class="px-4 py-2 rounded-xl text-xs font-medium bg-rose-600 hover:bg-rose-500 text-white">حذف پیام</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== STATE & SEED DATA ====================
+    const STORAGE_KEY = 'novachat_pro_state_v3';
+    const EMOJIS = ['👍', '❤️', '😂', '🔥', '👏', '🎉', '🤔', '👀', '✅', '🚀', '💡', '🙏', '😍', '😎', '📌', '💯', '🤝', '🎯'];
+    const VIP_EMOJIS = ['👑', '💎', '🌟', '🏆', '🛸', '⚡'];
+    const QUICK_REACTIONS = ['👍', '❤️', '😂', '🔥', '👏'];
+
+    const defaultUsers = [
+      {
+        id: 'u_owner',
+        username: 'admin',
+        password: '1234',
+        name: 'مدیر اصلی (شما)',
+        avatar: 'م',
+        color: 'from-amber-500 to-rose-600',
+        status: 'online',
+        roleType: 'superadmin',
+        title: 'مالک و مدیر اصلی چت‌روم',
+        bio: 'تنها دارنده دسترسی کامل به تنظیمات چت‌روم، قفل اتاق‌ها، مدیریت مدیران و VIP.',
+        muted: false,
+      },
+      {
+        id: 'u_mod',
+        username: 'sepehr',
+        password: '1234',
+        name: 'سپهر مرادی',
+        avatar: 'س',
+        color: 'from-sky-500 to-indigo-600',
+        status: 'online',
+        roleType: 'admin',
+        title: 'مدیر معمولی (ناظر)',
+        bio: 'نظارت بر گفتگوها؛ دارای دسترسی حذف پیام‌های نامناسب و سکوت کاربران.',
+        muted: false,
+      },
+      {
+        id: 'u_sara',
+        username: 'sara',
+        password: '1234',
+        name: 'سارا محمدی',
+        avatar: 'س',
+        color: 'from-amber-400 to-orange-500',
+        status: 'online',
+        roleType: 'vip',
+        title: 'عضو ویژه VIP | طراح UI/UX',
+        bio: 'عضو باشگاه ویژه آوا چت با امکانات طلایی.',
+        muted: false,
+      },
+      {
+        id: 'u_amir',
+        username: 'amir',
+        password: '1234',
+        name: 'امیرحسین رضایی',
+        avatar: 'ا',
+        color: 'from-emerald-500 to-teal-500',
+        status: 'online',
+        roleType: 'member',
+        title: 'توسعه‌دهنده وب',
+        bio: 'علاقه‌مند به توسعه فرانت‌اند و دیتابیس.',
+        muted: false,
+      },
+      {
+        id: 'u_bot',
+        username: 'novabot',
+        password: 'bot',
+        name: 'دستیار هوشمند آوا',
+        avatar: 'ه',
+        color: 'from-violet-500 to-fuchsia-500',
+        status: 'online',
+        roleType: 'bot',
+        title: 'دستیار هوش مصنوعی',
+        bio: 'پاسخگوی خودکار به سوالات کاربران.',
+        isBot: true,
+        muted: false,
+      },
+    ];
+
+    const defaultRooms = [
+      { id: 'ch_general', type: 'channel', name: 'عمومی', desc: 'گفتگوی آزاد و اطلاع‌رسانی‌های روزانه', unread: 0, pinnedId: 'm_102', vipOnly: false, locked: false, slowMode: false },
+      { id: 'ch_vip', type: 'channel', name: 'سالن-VIP', desc: 'فضای اختصاصی اعضای VIP و مدیر اصلی', unread: 1, pinnedId: null, vipOnly: true, locked: false, slowMode: false },
+      { id: 'ch_dev', type: 'channel', name: 'فنی-و-توسعه', desc: 'مباحث دیتابیس، گیت‌هاب و استقرار', unread: 0, pinnedId: null, vipOnly: false, locked: false, slowMode: false },
+      { id: 'dm_mod', type: 'dm', userId: 'u_mod', name: 'سپهر مرادی (مدیر)', desc: 'مدیر معمولی', unread: 0, pinnedId: null },
+      { id: 'dm_sara', type: 'dm', userId: 'u_sara', name: 'سارا محمدی (VIP)', desc: 'عضو VIP', unread: 0, pinnedId: null },
+      { id: 'dm_bot', type: 'dm', userId: 'u_bot', name: 'دستیار هوشمند آوا', desc: 'پاسخگویی سریع', unread: 0, pinnedId: null },
+    ];
+
+    const now = Date.now();
+    const defaultMessages = {
+      ch_general: [
+        { id: 'm_101', senderId: 'u_mod', text: 'سلام! من به عنوان **مدیر معمولی** فقط مسئولیت حذف پیام‌های نامناسب و سکوت کاربران رو بر عهده دارم 🛡️', ts: now - 3600000 * 3, reactions: { '👍': ['u_owner'] }, replyTo: null, edited: false, isVipShout: false },
+        { id: 'm_102', senderId: 'u_owner', text: 'خوش اومدید! مدیریت کل، قفل اتاق، تغییر نقش‌ها و تنظیمات فقط در اختیار **مدیر اصلی** هست 👑', ts: now - 3600000 * 2, reactions: { '🔥': ['u_mod', 'u_sara'] }, replyTo: null, edited: false, isVipShout: true },
+        {
+          id: 'm_poll_1',
+          senderId: 'u_owner',
+          text: 'نظرسنجی: برای نسخه بعدی چه قابلیتی اول اضافه بشه؟',
+          ts: now - 1800000,
+          reactions: {},
+          replyTo: null,
+          edited: false,
+          isVipShout: false,
+          poll: {
+            question: 'برای نسخه بعدی چه قابلیتی اول اضافه بشه؟',
+            options: [
+              { id: 'opt1', text: 'تماس صوتی و تصویری گروهی', votes: ['u_sara', 'u_mod'] },
+              { id: 'opt2', text: 'اتصال مستقیم به دیتابیس Supabase', votes: ['u_owner', 'u_amir'] },
+              { id: 'opt3', text: 'ربات بازی و سرگرمی در چت', votes: [] },
+            ]
+          }
+        },
+      ],
+      ch_vip: [
+        { id: 'm_vip_1', senderId: 'u_sara', text: 'به **سالن VIP** خوش اومدید! اینجا امکانات طلایی و ایموجی‌های خاص فعاله 💎👑', ts: now - 4000000, reactions: { '👑': ['u_owner'] }, replyTo: null, edited: false, isVipShout: true },
+      ],
+      ch_dev: [
+        { id: 'm_201', senderId: 'u_amir', text: 'برای اتصال به دیتابیس و گیت‌هاب می‌تونیم از Supabase و GitHub Pages استفاده کنیم 🚀', ts: now - 5400000, reactions: {}, replyTo: null, edited: false, isVipShout: false },
+      ],
+      dm_mod: [
+        { id: 'm_mod_1', senderId: 'u_mod', text: 'سلام رئیس! دسترسی من روی حذف پیام و سکوت کاربران تنظیم شده.', ts: now - 2500000, reactions: {}, replyTo: null, edited: false, isVipShout: false },
+      ],
+      dm_sara: [
+        { id: 'm_sara_1', senderId: 'u_sara', text: 'سلام! بخش نظرسنجی زنده و پیام صوتی خیلی خفن شده ✨', ts: now - 2000000, reactions: {}, replyTo: null, edited: false, isVipShout: true },
+      ],
+      dm_bot: [
+        { id: 'm_401', senderId: 'u_bot', text: 'سلام! من **دستیار هوشمند آوا** هستم. هر سوالی دارید بپرسید 🤖', ts: now - 4000000, reactions: {}, replyTo: null, edited: false, isVipShout: false },
+      ],
+    };
+
+    let state = loadState();
+    let activeRightTab = 'members';
+    let roomSearchQuery = '';
+    let msgSearchQuery = '';
+    let replyTargetId = null;
+    let editTargetId = null;
+    let deleteTargetId = null;
+    let selectedProfileUserId = null;
+    let pendingAttachment = null;
+    let soundEnabled = true;
+    let vipShoutMode = false;
+    let typingTimeout = null;
+    let lastSentTimestamp = 0;
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.rooms && parsed.messages && parsed.users) return parsed;
+        }
+      } catch (e) {}
+      return {
+        theme: 'light',
+        currentUserId: null, // Forces Auth Screen on first visit
+        activeRoomId: 'ch_general',
+        users: defaultUsers,
+        rooms: defaultRooms,
+        messages: defaultMessages,
+      };
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {}
+    }
+
+    // ==================== HELPERS & STRICT ROLE PERMISSIONS ====================
+    const $ = (id) => document.getElementById(id);
+
+    function getCurrentUser() {
+      return state.users.find((u) => u.id === state.currentUserId) || null;
+    }
+
+    function getUser(id) {
+      return state.users.find((u) => u.id === id) || state.users[0];
+    }
+
+    function getActiveRoom() {
+      return state.rooms.find((r) => r.id === state.activeRoomId) || state.rooms[0];
+    }
+
+    function isSuperAdmin(user) {
+      return user && user.roleType === 'superadmin';
+    }
+
+    function isRegularAdmin(user) {
+      return user && user.roleType === 'admin';
+    }
+
+    function hasVipAccess(user) {
+      return user && (user.roleType === 'superadmin' || user.roleType === 'vip');
+    }
+
+    function stripMarkdown(str) {
+      return String(str || '').replace(/\*\*([^*]+)\*\*/g, '$1').replace(/`([^`]+)`/g, '$1');
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function formatMessageText(raw) {
+      let safe = escapeHtml(raw);
+      safe = safe.replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 rounded bg-black/15 dark:bg-white/10 font-mono text-[12px]">$1</code>');
+      safe = safe.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold">$1</strong>');
+      safe = safe.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" class="underline decoration-indigo-400 hover:text-indigo-300">$1</a>');
+      return safe.replace(/\n/g, '<br>');
+    }
+
+    function formatTime(ts) {
+      try {
+        const d = new Date(ts);
+        const datePart = d.toLocaleDateString('fa-IR', { month: '2-digit', day: '2-digit' });
+        const timePart = d.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+        return `${datePart} ${timePart}`;
+      } catch (e) {
+        return 'الان';
+      }
+    }
+
+    function renderAvatarInner(user) {
+      if (user && user.photoUrl) {
+        return `<img src="${user.photoUrl}" alt="${escapeHtml(user.name)}" class="w-full h-full object-cover rounded-full" />`;
+      }
+      return escapeHtml(user ? user.avatar : '?');
+    }
+
+    function getAvatarRingClass(user) {
+      if (user && user.vipFrame && hasVipAccess(user)) {
+        return 'ring-2 ring-amber-400 shadow-md shadow-amber-500/30';
+      }
+      return '';
+    }
+
+    function getRoleBadgeHtml(roleType) {
+      if (roleType === 'superadmin') {
+        return '<span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-gradient-to-l from-rose-500 to-amber-500 text-white">👑 مدیر اصلی</span>';
+      }
+      if (roleType === 'admin') {
+        return '<span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-sky-500/20 text-sky-500 border border-sky-500/30">🛡️ مدیر</span>';
+      }
+      if (roleType === 'vip') {
+        return '<span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-amber-500/20 text-amber-500 border border-amber-500/30">💎 VIP</span>';
+      }
+      if (roleType === 'bot') {
+        return '<span class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-violet-500/20 text-violet-400">AI</span>';
+      }
+      return '';
+    }
+
+    function statusColor(status) {
+      if (status === 'online') return 'bg-emerald-500';
+      if (status === 'away') return 'bg-amber-500';
+      return 'bg-rose-500';
+    }
+
+    function statusLabel(status) {
+      if (status === 'online') return 'آنلاین';
+      if (status === 'away') return 'مشغول';
+      return 'مزاحم نشوید';
+    }
+
+    function playNotificationSound() {
+      if (!soundEnabled) return;
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(660, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.05, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.16);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.17);
+      } catch (e) {}
+    }
+
+    function showToast(msg, type = 'info') {
+      const container = $('toast-container');
+      const el = document.createElement('div');
+      const colors = type === 'error'
+        ? 'bg-rose-600 text-white'
+        : type === 'success'
+        ? 'bg-emerald-600 text-white'
+        : type === 'vip'
+        ? 'bg-gradient-to-l from-amber-500 to-orange-500 text-white'
+        : 'bg-slate-800 text-white dark:bg-slate-700';
+      el.className = `${colors} px-3.5 py-2.5 rounded-xl shadow-lg text-xs font-medium pointer-events-auto msg-enter flex items-center justify-between gap-2`;
+      el.textContent = msg;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transition = 'opacity 0.2s';
+        setTimeout(() => el.remove(), 220);
+      }, 2600);
+    }
+
+    function refreshIcons() {
+      if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        window.lucide.createIcons();
+      }
+    }
+
+    // ==================== AUTHENTICATION ====================
+    function renderAuthOrApp() {
+      const me = getCurrentUser();
+      if (!me) {
+        $('auth-screen').classList.remove('hidden');
+        $('app-shell').classList.add('hidden');
+        $('app-shell').classList.remove('flex');
+        refreshIcons();
+      } else {
+        $('auth-screen').classList.add('hidden');
+        $('app-shell').classList.remove('hidden');
+        $('app-shell').classList.add('flex');
+        renderAll(true);
+      }
+    }
+
+    function loginAs(user) {
+      state.currentUserId = user.id;
+      vipShoutMode = false;
+      syncUserToSupabase(user);
+      pullAllFromSupabase();
+      saveState();
+      renderAuthOrApp();
+      showToast(`خوش آمدید، ${user.name}!`, 'success');
+    }
+
+    // ==================== RENDERING ====================
+    function applyTheme() {
+      const html = document.documentElement;
+      if (state.theme === 'dark') html.classList.add('dark');
+      else html.classList.remove('dark');
+    }
+
+    function renderProfileFooter() {
+      const me = getCurrentUser();
+      if (!me) return;
+      $('me-name').textContent = me.name;
+      $('me-avatar').innerHTML = renderAvatarInner(me);
+      $('me-avatar').className = `w-9 h-9 rounded-full bg-gradient-to-tr ${me.color} ${getAvatarRingClass(me)} flex items-center justify-center text-white font-bold text-xs overflow-hidden`;
+      $('me-role-badge').innerHTML = getRoleBadgeHtml(me.roleType);
+      $('me-status-text').textContent = me.muted ? 'سکوت‌شده' : (me.customStatus || statusLabel(me.status));
+      $('me-status-dot').className = `w-2.5 h-2.5 rounded-full ${statusColor(me.status)} ring-2 ring-white dark:ring-slate-900 absolute bottom-0 right-0`;
+      const onlineCount = state.users.filter((u) => u.status === 'online').length;
+      $('online-count-label').textContent = `${onlineCount.toLocaleString('fa-IR')} نفر آنلاین`;
+
+      // Super Admin exclusive UI controls
+      const superAdmin = isSuperAdmin(me);
+      $('superadmin-panel-btn-wrap').classList.toggle('hidden', !superAdmin);
+      $('btn-new-channel').classList.toggle('hidden', !superAdmin);
+      $('btn-unpin-banner').classList.toggle('hidden', !superAdmin);
+
+      const vipActive = hasVipAccess(me);
+      $('vip-sidebar-sub').textContent = vipActive ? 'اشتراک ویژه برای شما فعال است ✨' : 'مخصوص اعضای VIP و مدیر اصلی';
+      $('btn-vip-shout').classList.toggle('text-amber-500', vipShoutMode);
+      $('btn-vip-shout').classList.toggle('bg-amber-500/15', vipShoutMode);
+      renderEmojiGrids();
+    }
+
+    function renderEmojiGrids() {
+      const me = getCurrentUser();
+      const vipActive = hasVipAccess(me);
+      $('emoji-grid').innerHTML = EMOJIS.map((em) => `<button type="button" class="emoji-opt p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition">${em}</button>`).join('');
+      $('vip-emoji-lock-label').textContent = vipActive ? 'فعال' : 'نیاز به VIP';
+      $('vip-emoji-grid').innerHTML = VIP_EMOJIS.map((em) => `<button type="button" data-vip-emoji="true" class="emoji-opt p-1.5 rounded-lg transition ${vipActive ? 'hover:bg-amber-500/15' : 'opacity-40 cursor-not-allowed'}">${em}</button>`).join('');
+    }
+
+    function renderSidebar() {
+      const q = roomSearchQuery.trim().toLowerCase();
+      const channels = state.rooms.filter((r) => r.type === 'channel' && (!q || r.name.toLowerCase().includes(q)));
+      const dms = state.rooms.filter((r) => r.type === 'dm' && (!q || r.name.toLowerCase().includes(q)));
+
+      $('channel-list').innerHTML = channels.map((r) => {
+        const active = r.id === state.activeRoomId;
+        return `
+          <button data-room-id="${r.id}" class="room-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition ${active ? 'bg-indigo-600 text-white font-semibold shadow-sm shadow-indigo-500/20' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80'}">
+            <span class="flex items-center gap-2 min-w-0">
+              <span class="${active ? 'text-indigo-200' : r.vipOnly ? 'text-amber-500' : 'text-slate-400'} font-bold">${r.vipOnly ? '👑' : '#'}</span>
+              <span class="truncate">${escapeHtml(r.name)}</span>
+              ${r.locked ? '<span class="text-[10px]">🔒</span>' : ''}
+            </span>
+            ${r.unread > 0 ? `<span class="px-1.5 py-0.5 text-[10px] rounded-full ${active ? 'bg-white text-indigo-600' : 'bg-indigo-500 text-white'} font-bold">${r.unread}</span>` : ''}
+          </button>
+        `;
+      }).join('') || '<div class="text-[11px] text-slate-400 px-3 py-1">کانالی یافت نشد</div>';
+
+      $('dm-list').innerHTML = dms.map((r) => {
+        const active = r.id === state.activeRoomId;
+        const user = getUser(r.userId);
+        return `
+          <button data-room-id="${r.id}" class="room-item w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition ${active ? 'bg-indigo-600 text-white font-semibold shadow-sm shadow-indigo-500/20' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80'}">
+            <span class="flex items-center gap-2.5 min-w-0">
+              <span class="relative shrink-0">
+                <span class="w-6 h-6 rounded-full bg-gradient-to-tr ${user.color} ${getAvatarRingClass(user)} flex items-center justify-center text-[10px] text-white font-bold overflow-hidden">${renderAvatarInner(user)}</span>
+                <span class="w-2 h-2 rounded-full ${statusColor(user.status)} ring-1 ring-white dark:ring-slate-900 absolute -bottom-0.5 -right-0.5"></span>
+              </span>
+              <span class="truncate">${escapeHtml(r.name)}</span>
+            </span>
+            ${r.unread > 0 ? `<span class="px-1.5 py-0.5 text-[10px] rounded-full ${active ? 'bg-white text-indigo-600' : 'bg-indigo-500 text-white'} font-bold">${r.unread}</span>` : ''}
+          </button>
+        `;
+      }).join('') || '<div class="text-[11px] text-slate-400 px-3 py-1">کاربری یافت نشد</div>';
+    }
+
+    function renderChatHeader() {
+      const room = getActiveRoom();
+      $('active-room-title').textContent = room.name;
+      $('active-room-desc').textContent = room.desc || '';
+      const iconEl = $('active-room-icon');
+      const badgeEl = $('active-room-badge');
+
+      $('room-lock-badge').classList.toggle('hidden', !room.locked);
+      $('room-slow-badge').classList.toggle('hidden', !room.slowMode);
+
+      if (room.type === 'channel') {
+        iconEl.textContent = room.vipOnly ? '👑' : '#';
+        iconEl.className = `w-9 h-9 rounded-xl ${room.vipOnly ? 'bg-amber-500/15 text-amber-500' : 'bg-indigo-500/10 text-indigo-500'} flex items-center justify-center shrink-0 font-bold`;
+        if (room.vipOnly) {
+          badgeEl.textContent = 'اختصاصی VIP';
+          badgeEl.className = 'text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-500 font-medium';
+        } else {
+          badgeEl.className = 'hidden';
+        }
+      } else {
+        const user = getUser(room.userId);
+        iconEl.textContent = user.avatar;
+        iconEl.className = `w-9 h-9 rounded-full bg-gradient-to-tr ${user.color} text-white flex items-center justify-center shrink-0 font-bold text-xs`;
+        if (user.isBot) {
+          badgeEl.textContent = 'هوشمند';
+          badgeEl.className = 'text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-500 font-medium';
+        } else {
+          badgeEl.className = 'hidden';
+        }
+      }
+
+      const msgs = state.messages[room.id] || [];
+      const pinned = msgs.find((m) => m.id === room.pinnedId);
+      if (pinned) {
+        $('pinned-banner').classList.remove('hidden');
+        $('pinned-preview-text').textContent = stripMarkdown(pinned.text) || (pinned.attachment ? pinned.attachment.name : 'پیام سنجاق‌شده');
+      } else {
+        $('pinned-banner').classList.add('hidden');
+      }
+    }
+
+    function renderMessages(scrollToBottom = true) {
+      const room = getActiveRoom();
+      const me = getCurrentUser();
+      if (!me) return;
+      const container = $('messages-container');
+
+      if (room.vipOnly && !hasVipAccess(me)) {
+        container.innerHTML = `
+          <div class="h-full flex flex-col items-center justify-center text-center p-6 space-y-3">
+            <div class="w-14 h-14 rounded-2xl bg-amber-500/15 text-amber-500 flex items-center justify-center">
+              <i data-lucide="lock" class="w-7 h-7"></i>
+            </div>
+            <h3 class="font-bold text-sm">این کانال مخصوص اعضای VIP و مدیر اصلی است</h3>
+            <p class="text-xs text-slate-400 max-w-xs">برای دسترسی به سالن VIP و امکانات طلایی، از مدیر اصلی بخواهید نشان VIP به حساب شما بدهد.</p>
+            <button data-action="open-vip-modal" class="px-4 py-2 rounded-xl bg-gradient-to-l from-amber-500 to-orange-500 text-white text-xs font-bold shadow-md">مشاهده امکانات VIP</button>
+          </div>
+        `;
+        refreshIcons();
+        return;
+      }
+
+      const allMsgs = state.messages[room.id] || [];
+      const q = msgSearchQuery.trim().toLowerCase();
+      const msgs = q ? allMsgs.filter((m) => (m.text || '').toLowerCase().includes(q)) : allMsgs;
+
+      $('msg-search-count').textContent = q ? `${msgs.length.toLocaleString('fa-IR')} نتیجه` : '';
+
+      if (msgs.length === 0) {
+        container.innerHTML = `
+          <div class="h-full flex flex-col items-center justify-center text-center text-slate-400 py-12">
+            <i data-lucide="message-circle" class="w-10 h-10 mb-2 opacity-40"></i>
+            <p class="text-xs">${q ? 'هیچ پیامی مطابق جستجو یافت نشد.' : 'هنوز پیامی در این اتاق ارسال نشده است.'}</p>
+          </div>
+        `;
+        refreshIcons();
+        return;
+      }
+
+      const superAdmin = isSuperAdmin(me);
+      const regAdmin = isRegularAdmin(me);
+
+      container.innerHTML = msgs.map((m) => {
+        const isMe = m.senderId === me.id;
+        const sender = getUser(m.senderId);
+        const replyMsg = m.replyTo ? allMsgs.find((x) => x.id === m.replyTo) : null;
+        const replySender = replyMsg ? getUser(replyMsg.senderId) : null;
+        const isPinned = room.pinnedId === m.id;
+
+        // STRICT PERMISSIONS:
+        // Super Admin can delete any message & pin any message.
+        // Regular Admin can ONLY delete messages of non-superadmin users (cannot pin, cannot delete superadmin).
+        // Regular users can only edit/delete their own messages.
+        const canDelete = isMe || superAdmin || (regAdmin && sender.roleType !== 'superadmin');
+        const canPin = superAdmin;
+
+        const bubbleClass = m.isVipShout
+          ? 'bg-gradient-to-br from-amber-500/20 via-amber-500/10 to-orange-500/20 border-2 border-amber-400/70 text-slate-900 dark:text-amber-50 vip-glow rounded-2xl'
+          : isMe
+          ? 'bg-[#2b2d31] text-white rounded-2xl rounded-tr-sm'
+          : 'bg-[#ededed] dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-2xl rounded-tl-sm';
+
+        const reactionsHtml = Object.entries(m.reactions || {})
+          .filter(([, users]) => users.length > 0)
+          .map(([emoji, users]) => {
+            const reacted = users.includes(me.id);
+            return `<button data-action="react" data-msg-id="${m.id}" data-emoji="${emoji}" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] border transition ${reacted ? 'bg-indigo-500/15 border-indigo-500/40 text-indigo-500 dark:text-indigo-300' : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-indigo-400'}"><span>${emoji}</span><span>${users.length}</span></button>`;
+          }).join('');
+
+        let pollHtml = '';
+        if (m.poll) {
+          const totalVotes = m.poll.options.reduce((acc, o) => acc + o.votes.length, 0);
+          pollHtml = `
+            <div class="mt-2.5 space-y-1.5 min-w-[220px]">
+              ${m.poll.options.map((opt) => {
+                const pct = totalVotes > 0 ? Math.round((opt.votes.length / totalVotes) * 100) : 0;
+                const voted = opt.votes.includes(me.id);
+                return `
+                  <button data-action="vote" data-msg-id="${m.id}" data-opt-id="${opt.id}" class="w-full text-right relative overflow-hidden rounded-xl border ${voted ? 'border-emerald-400 bg-emerald-500/15' : 'border-black/15 dark:border-white/15 bg-black/10 dark:bg-white/5'} px-3 py-2 text-xs transition">
+                    <div class="absolute inset-y-0 right-0 bg-emerald-500/20 transition-all duration-300" style="width:${pct}%"></div>
+                    <div class="relative flex items-center justify-between gap-2">
+                      <span class="font-medium">${escapeHtml(opt.text)} ${voted ? '✓' : ''}</span>
+                      <span class="text-[10px] font-bold">${pct}%</span>
+                    </div>
+                  </button>
+                `;
+              }).join('')}
+              <div class="text-[10px] opacity-75 pt-0.5">مجموع آرا: ${totalVotes.toLocaleString('fa-IR')}</div>
+            </div>
+          `;
+        }
+
+        let voiceHtml = '';
+        if (m.voice) {
+          voiceHtml = `
+            <div class="mt-1.5 flex items-center gap-2.5 bg-black/15 dark:bg-white/10 px-3 py-2 rounded-xl min-w-[180px]">
+              <button data-action="play-voice" data-msg-id="${m.id}" class="w-7 h-7 rounded-full bg-indigo-500 text-white flex items-center justify-center shrink-0">
+                <i data-lucide="play" class="w-3.5 h-3.5"></i>
+              </button>
+              <div class="flex-1 h-1.5 bg-white/30 rounded-full overflow-hidden">
+                <div class="w-2/3 h-full bg-emerald-400 rounded-full"></div>
+              </div>
+              <span class="text-[10px] font-mono">${escapeHtml(m.voice.duration)}</span>
+            </div>
+          `;
+        }
+
+        const attachmentHtml = m.attachment ? (
+          m.attachment.isImage
+            ? `<div class="mt-2"><img src="${m.attachment.dataUrl}" alt="${escapeHtml(m.attachment.name)}" class="max-w-full sm:max-w-xs max-h-56 rounded-xl border border-black/10 dark:border-white/10 object-cover" /></div>`
+            : `<a href="${m.attachment.dataUrl}" download="${escapeHtml(m.attachment.name)}" class="mt-2 flex items-center gap-2.5 p-2.5 rounded-xl bg-black/10 dark:bg-white/10 hover:bg-black/15 transition text-xs"><i data-lucide="file-down" class="w-4 h-4 shrink-0"></i><span class="truncate">${escapeHtml(m.attachment.name)}</span><span class="text-[10px] opacity-75 shrink-0">${escapeHtml(m.attachment.size)}</span></a>`
+        ) : '';
+
+        return `
+          <div id="msg-${m.id}" class="group flex items-start gap-2 ${isMe ? 'flex-row' : 'flex-row-reverse'} msg-enter">
+            <button data-action="view-user" data-user-id="${sender.id}" class="w-8 h-8 rounded-full bg-gradient-to-tr ${sender.color} ${getAvatarRingClass(sender)} flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5 hover:scale-105 transition overflow-hidden">${renderAvatarInner(sender)}</button>
+
+            <div class="max-w-[78%] sm:max-w-[68%] flex flex-col ${isMe ? 'items-start' : 'items-end'}">
+              <div class="flex items-center gap-1.5 mb-0.5 px-1 flex-wrap ${isMe ? 'flex-row' : 'flex-row-reverse'}">
+                <button data-action="view-user" data-user-id="${sender.id}" class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 hover:text-indigo-500 transition">${escapeHtml(sender.name)}</button>
+                ${getRoleBadgeHtml(sender.roleType)}
+                ${m.edited ? '<span class="text-[10px] text-slate-400">(ویرایش‌شده)</span>' : ''}
+                ${isPinned ? '<span class="text-[10px] text-indigo-500 flex items-center gap-0.5"><i data-lucide="pin" class="w-3 h-3"></i>سنجاق</span>' : ''}
+              </div>
+
+              <div class="relative flex items-center gap-1.5 ${isMe ? 'flex-row' : 'flex-row-reverse'}">
+                <div class="px-3.5 py-2.5 rounded-2xl text-xs sm:text-[13px] leading-relaxed shadow-sm ${bubbleClass}">
+                  ${replyMsg ? `
+                    <button data-action="jump" data-target-id="${replyMsg.id}" class="w-full text-right mb-2 px-2.5 py-1.5 rounded-lg text-[11px] border-r-2 ${isMe && !m.isVipShout ? 'bg-indigo-700/60 border-indigo-300 text-indigo-100' : 'bg-slate-100 dark:bg-slate-800 border-indigo-500 text-slate-600 dark:text-slate-300'} block truncate">
+                      <span class="font-semibold block">${escapeHtml(replySender.name)}</span>
+                      <span class="truncate block opacity-85">${escapeHtml(stripMarkdown(replyMsg.text) || 'فایل پیوست')}</span>
+                    </button>
+                  ` : ''}
+                  ${m.text ? `<div>${formatMessageText(m.text)}</div>` : ''}
+                  ${pollHtml}
+                  ${voiceHtml}
+                  ${attachmentHtml}
+                </div>
+
+                <!-- Hover Action Toolbar -->
+                <div class="opacity-90 sm:opacity-0 sm:group-hover:opacity-100 focus-within:opacity-100 transition flex items-center gap-0.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-1 shadow-md shrink-0">
+                  ${QUICK_REACTIONS.slice(0, 3).map((em) => `<button data-action="react" data-msg-id="${m.id}" data-emoji="${em}" class="px-1.5 py-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-xs">${em}</button>`).join('')}
+                  <button data-action="reply" data-msg-id="${m.id}" title="پاسخ" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300"><i data-lucide="reply" class="w-3.5 h-3.5"></i></button>
+                  <button data-action="copy" data-msg-id="${m.id}" title="کپی متن" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
+                  ${canPin ? `<button data-action="pin" data-msg-id="${m.id}" title="سنجاق" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300"><i data-lucide="pin" class="w-3.5 h-3.5"></i></button>` : ''}
+                  ${isMe ? `<button data-action="edit" data-msg-id="${m.id}" title="ویرایش" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>` : ''}
+                  ${canDelete ? `<button data-action="delete" data-msg-id="${m.id}" title="حذف" class="p-1.5 rounded-lg hover:bg-rose-500/10 text-rose-500"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>` : ''}
+                </div>
+              </div>
+
+              ${reactionsHtml ? `<div class="flex flex-wrap gap-1 mt-1 px-1">${reactionsHtml}</div>` : ''}
+              <span class="text-[10px] text-slate-400 mt-0.5 px-1" dir="ltr">${formatTime(m.ts)}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      refreshIcons();
+      if (scrollToBottom && !q) container.scrollTop = container.scrollHeight;
+    }
+
+    function renderRightPanel() {
+      const panel = $('right-panel-content');
+      const room = getActiveRoom();
+      const msgs = state.messages[room.id] || [];
+
+      if (activeRightTab === 'members') {
+        const totalAllMsgs = Object.values(state.messages).reduce((sum, arr) => sum + arr.length, 0);
+        panel.innerHTML = `
+          <div class="grid grid-cols-2 gap-2 mb-2 text-center">
+            <div class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800/70">
+              <div class="text-sm font-bold text-indigo-500">${state.users.length.toLocaleString('fa-IR')}</div>
+              <div class="text-[10px] text-slate-400">کل اعضا</div>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800/70">
+              <div class="text-sm font-bold text-emerald-500">${totalAllMsgs.toLocaleString('fa-IR')}</div>
+              <div class="text-[10px] text-slate-400">کل پیام‌ها</div>
+            </div>
+          </div>
+        ` + state.users.map((u) => `
+          <button data-action="view-user" data-user-id="${u.id}" class="w-full text-right flex items-center justify-between p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/70 transition">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <div class="relative shrink-0">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr ${u.color} ${getAvatarRingClass(u)} flex items-center justify-center text-white text-xs font-bold overflow-hidden">${renderAvatarInner(u)}</div>
+                <span class="w-2.5 h-2.5 rounded-full ${statusColor(u.status)} ring-2 ring-white dark:ring-slate-900 absolute bottom-0 right-0"></span>
+              </div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-1 flex-wrap">
+                  <span class="text-xs font-semibold truncate">${escapeHtml(u.name)}</span>
+                  ${getRoleBadgeHtml(u.roleType)}
+                </div>
+                <div class="text-[10px] text-slate-400 truncate">${escapeHtml(u.title)}</div>
+              </div>
+            </div>
+            ${u.muted ? '<span class="text-[10px] text-rose-500 shrink-0">سکوت</span>' : ''}
+          </button>
+        `).join('');
+      } else if (activeRightTab === 'pinned') {
+        const pinned = msgs.find((m) => m.id === room.pinnedId);
+        if (!pinned) {
+          panel.innerHTML = '<p class="text-xs text-slate-400 text-center py-8">پیام سنجاق‌شده‌ای در این اتاق نیست.</p>';
+        } else {
+          const sender = getUser(pinned.senderId);
+          panel.innerHTML = `
+            <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-2">
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="font-semibold text-indigo-500">${escapeHtml(sender.name)}</span>
+                <span class="text-slate-400">${formatTime(pinned.ts)}</span>
+              </div>
+              <p class="text-xs leading-relaxed">${formatMessageText(pinned.text || 'فایل پیوست')}</p>
+              <button data-action="jump" data-target-id="${pinned.id}" class="text-[11px] text-indigo-500 hover:underline">رفتن به پیام</button>
+            </div>
+          `;
+        }
+      } else {
+        const files = msgs.filter((m) => m.attachment);
+        if (files.length === 0) {
+          panel.innerHTML = '<p class="text-xs text-slate-400 text-center py-8">هنوز فایلی در این اتاق به اشتراک گذاشته نشده است.</p>';
+        } else {
+          panel.innerHTML = files.map((m) => `
+            <a href="${m.attachment.dataUrl}" download="${escapeHtml(m.attachment.name)}" class="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200/70 dark:hover:bg-slate-800 transition text-xs">
+              <i data-lucide="file" class="w-4 h-4 text-indigo-500 shrink-0"></i>
+              <div class="min-w-0 flex-1">
+                <div class="font-medium truncate">${escapeHtml(m.attachment.name)}</div>
+                <div class="text-[10px] text-slate-400">${escapeHtml(m.attachment.size)}</div>
+              </div>
+            </a>
+          `).join('');
+        }
+      }
+      refreshIcons();
+    }
+
+    function renderAll(scroll = true) {
+      applyTheme();
+      renderProfileFooter();
+      renderSidebar();
+      renderChatHeader();
+      renderMessages(scroll);
+      renderRightPanel();
+    }
+
+    // ==================== ACTIONS ====================
+    function selectRoom(roomId) {
+      state.activeRoomId = roomId;
+      const room = getActiveRoom();
+      room.unread = 0;
+      replyTargetId = null;
+      editTargetId = null;
+      msgSearchQuery = '';
+      $('msg-search-input').value = '';
+      $('msg-search-bar').classList.add('hidden');
+      updateComposerContext();
+      saveState();
+      renderAll(true);
+      closeMobileSidebars();
+    }
+
+    function updateComposerContext() {
+      const bar = $('composer-context-bar');
+      if (editTargetId) {
+        const msgs = state.messages[state.activeRoomId] || [];
+        const msg = msgs.find((m) => m.id === editTargetId);
+        if (msg) {
+          bar.classList.remove('hidden');
+          $('composer-context-label').textContent = 'در حال ویرایش پیام';
+          $('composer-context-text').textContent = stripMarkdown(msg.text);
+          return;
+        }
+      }
+      if (replyTargetId) {
+        const msgs = state.messages[state.activeRoomId] || [];
+        const msg = msgs.find((m) => m.id === replyTargetId);
+        if (msg) {
+          bar.classList.remove('hidden');
+          $('composer-context-label').textContent = `پاسخ به ${getUser(msg.senderId).name}`;
+          $('composer-context-text').textContent = stripMarkdown(msg.text) || 'فایل پیوست';
+          return;
+        }
+      }
+      bar.classList.add('hidden');
+    }
+
+    function openUserCard(userId) {
+      const user = getUser(userId);
+      const me = getCurrentUser();
+      if (!me) return;
+      selectedProfileUserId = userId;
+
+      $('uc-avatar').innerHTML = renderAvatarInner(user);
+      $('uc-avatar').className = `w-12 h-12 rounded-full bg-gradient-to-tr ${user.color} ${getAvatarRingClass(user)} flex items-center justify-center text-white font-bold text-base overflow-hidden`;
+      $('uc-name').textContent = user.name;
+      $('uc-badge').innerHTML = getRoleBadgeHtml(user.roleType);
+      $('uc-title').textContent = user.title || '';
+      $('uc-bio').textContent = user.bio || 'بدون بیوگرافی';
+      $('uc-status-label').textContent = user.muted ? 'سکوت‌شده' : (user.customStatus || statusLabel(user.status));
+
+      let totalMsgs = 0;
+      Object.values(state.messages).forEach((arr) => {
+        totalMsgs += arr.filter((m) => m.senderId === userId).length;
+      });
+      $('uc-msg-count').textContent = totalMsgs.toLocaleString('fa-IR');
+
+      const adminControls = $('uc-admin-controls');
+      const canManageThisUser = (isSuperAdmin(me) || isRegularAdmin(me)) && userId !== me.id && user.roleType !== 'superadmin' && !user.isBot;
+      if (canManageThisUser) {
+        adminControls.classList.remove('hidden');
+        // ONLY Super Admin can change roles (admin / VIP). Regular admins can ONLY mute!
+        $('uc-superadmin-only-btns').classList.toggle('hidden', !isSuperAdmin(me));
+        $('btn-uc-role-admin').textContent = user.roleType === 'admin' ? 'لغو نقش مدیر' : 'ارتقا به مدیر معمولی';
+        $('btn-uc-role-vip').textContent = user.roleType === 'vip' ? 'لغو عضویت VIP' : 'اعطای نشان VIP';
+        $('btn-uc-mute').textContent = user.muted ? 'رفع سکوت کاربر' : 'سکوت کردن کاربر';
+      } else {
+        adminControls.classList.add('hidden');
+      }
+
+      $('modal-user-card').classList.remove('hidden');
+      $('modal-user-card').classList.add('flex');
+      refreshIcons();
+    }
+
+    function openVipModal() {
+      const me = getCurrentUser();
+      const isVip = hasVipAccess(me);
+      $('vip-modal-status').textContent = isVip
+        ? 'وضعیت: دسترسی VIP برای شما فعال است ✅'
+        : 'وضعیت: کاربر عادی (اعطا توسط مدیر اصلی)';
+      $('modal-vip').classList.remove('hidden');
+      $('modal-vip').classList.add('flex');
+      refreshIcons();
+    }
+
+    function sendMessage() {
+      const me = getCurrentUser();
+      if (!me) return;
+      if (me.muted) {
+        showToast('حساب شما توسط مدیریت سکوت شده است', 'error');
+        return;
+      }
+      const room = getActiveRoom();
+      if (room.locked && !isSuperAdmin(me)) {
+        showToast('این کانال توسط مدیر اصلی قفل شده است', 'error');
+        return;
+      }
+      if (room.vipOnly && !hasVipAccess(me)) {
+        showToast('این کانال مخصوص اعضای VIP و مدیر اصلی است', 'error');
+        return;
+      }
+      if (room.slowMode && !isSuperAdmin(me)) {
+        const diff = (Date.now() - lastSentTimestamp) / 1000;
+        if (diff < 5) {
+          showToast(`حالت آهسته فعال است! ${Math.ceil(5 - diff)} ثانیه صبر کنید`, 'error');
+          return;
+        }
+      }
+
+      const input = $('message-input');
+      const text = input.value.trim();
+      if (!text && !pendingAttachment) return;
+
+      const roomId = state.activeRoomId;
+      if (!state.messages[roomId]) state.messages[roomId] = [];
+
+      if (editTargetId) {
+        const target = state.messages[roomId].find((m) => m.id === editTargetId);
+        if (target) {
+          target.text = text;
+          target.edited = true;
+          syncMessageToSupabase(roomId, target);
+          showToast('پیام ویرایش شد', 'success');
+        }
+        editTargetId = null;
+      } else {
+        const newMsg = {
+          id: 'm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+          senderId: me.id,
+          text,
+          ts: Date.now(),
+          reactions: {},
+          replyTo: replyTargetId,
+          edited: false,
+          isVipShout: vipShoutMode && hasVipAccess(me),
+          attachment: pendingAttachment ? { ...pendingAttachment } : null,
+        };
+        state.messages[roomId].push(newMsg);
+        syncMessageToSupabase(roomId, newMsg);
+        lastSentTimestamp = Date.now();
+        replyTargetId = null;
+        clearAttachment();
+        triggerSimulatedReply(roomId, text);
+      }
+
+      input.value = '';
+      input.style.height = 'auto';
+      updateComposerContext();
+      saveState();
+      renderAll(true);
+    }
+
+    function triggerSimulatedReply(roomId, userText) {
+      const room = state.rooms.find((r) => r.id === roomId);
+      const me = getCurrentUser();
+      if (!room || !me) return;
+
+      let responderId = null;
+      if (room.type === 'dm' && room.userId !== me.id) responderId = room.userId;
+      else if (roomId === 'ch_general' && me.id !== 'u_mod') responderId = 'u_mod';
+      else if (roomId === 'ch_vip' && me.id !== 'u_sara') responderId = 'u_sara';
+      else if (roomId === 'ch_dev' && me.id !== 'u_amir') responderId = 'u_amir';
+
+      if (!responderId) return;
+      const responder = getUser(responderId);
+
+      clearTimeout(typingTimeout);
+      $('typing-text').textContent = `${responder.name} در حال نوشتن است...`;
+      $('typing-indicator').classList.remove('hidden');
+
+      typingTimeout = setTimeout(() => {
+        $('typing-indicator').classList.add('hidden');
+        let replyText = 'پیام شما دریافت شد! 👍';
+        const lower = (userText || '').toLowerCase();
+
+        if (responder.isBot) {
+          replyText = lower.includes('دیتابیس') || lower.includes('گیت')
+            ? 'برای ذخیره آنلاین از Supabase و برای انتشار لینک آنلاین از GitHub Pages استفاده کنید 🚀'
+            : `پیام شما با موفقیت ثبت شد: «${userText.slice(0, 50)}${userText.length > 50 ? '...' : ''}» ✨`;
+        } else if (responder.roleType === 'admin') {
+          replyText = 'دریافت شد! به عنوان مدیر معمولی نظم کانال رو کنترل می‌کنم 🛡️';
+        } else if (responder.roleType === 'vip') {
+          replyText = 'عالیه! امکانات VIP واقعاً کاربردیه 💎';
+        }
+
+        const msgObj = {
+          id: 'm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+          senderId: responderId,
+          text: replyText,
+          ts: Date.now(),
+          reactions: {},
+          replyTo: null,
+          edited: false,
+          isVipShout: responder.roleType === 'vip',
+        };
+        if (!state.messages[roomId]) state.messages[roomId] = [];
+        state.messages[roomId].push(msgObj);
+        if (state.activeRoomId !== roomId) room.unread = (room.unread || 0) + 1;
+        playNotificationSound();
+        saveState();
+        renderAll(true);
+      }, 1000);
+    }
+
+    function toggleReaction(msgId, emoji) {
+      const me = getCurrentUser();
+      const msgs = state.messages[state.activeRoomId] || [];
+      const msg = msgs.find((m) => m.id === msgId);
+      if (!msg || !me) return;
+      if (!msg.reactions) msg.reactions = {};
+      if (!msg.reactions[emoji]) msg.reactions[emoji] = [];
+      const idx = msg.reactions[emoji].indexOf(me.id);
+      if (idx >= 0) msg.reactions[emoji].splice(idx, 1);
+      else msg.reactions[emoji].push(me.id);
+      syncMessageToSupabase(state.activeRoomId, msg);
+      saveState();
+      renderMessages(false);
+    }
+
+    function togglePin(msgId) {
+      const me = getCurrentUser();
+      if (!isSuperAdmin(me)) {
+        showToast('فقط مدیر اصلی می‌تواند پیام را سنجاق کند', 'error');
+        return;
+      }
+      const room = getActiveRoom();
+      room.pinnedId = room.pinnedId === msgId ? null : msgId;
+      saveState();
+      renderChatHeader();
+      renderMessages(false);
+      renderRightPanel();
+      showToast(room.pinnedId ? 'پیام سنجاق شد' : 'سنجاق پیام برداشته شد', 'info');
+    }
+
+    function jumpToMessage(targetId) {
+      const el = document.getElementById('msg-' + targetId);
+      if (!el) return;
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.remove('highlight-msg');
+      void el.offsetWidth;
+      el.classList.add('highlight-msg');
+    }
+
+    function clearAttachment() {
+      pendingAttachment = null;
+      $('file-input').value = '';
+      $('attachment-preview-bar').classList.add('hidden');
+      $('attachment-thumb').classList.add('hidden');
+    }
+
+    function closeMobileSidebars() {
+      $('left-sidebar').classList.add('translate-x-full');
+      $('sidebar-backdrop').classList.add('hidden');
+    }
+
+    let sbClient = null;
+    let sbPollTimer = null;
+
+    async function syncUserToSupabase(u) {
+      if (!sbClient || !u) return;
+      try {
+        await sbClient.from('chat_users').upsert({
+          id: u.id,
+          username: u.username,
+          password: u.password || '1234',
+          name: u.name,
+          avatar: u.avatar || u.name.charAt(0),
+          color: u.color || 'from-indigo-500 to-cyan-500',
+          photo_url: u.photoUrl || null,
+          status: u.status || 'online',
+          custom_status: u.customStatus || null,
+          role_type: u.roleType || 'member',
+          title: u.title || 'عضو',
+          bio: u.bio || '',
+          vip_frame: !!u.vipFrame,
+          muted: !!u.muted,
+        });
+      } catch (e) {}
+    }
+
+    async function syncRoomToSupabase(r) {
+      if (!sbClient || !r || r.type !== 'channel') return;
+      try {
+        await sbClient.from('chat_rooms').upsert({
+          id: r.id,
+          type: r.type,
+          name: r.name,
+          description: r.desc || '',
+          vip_only: !!r.vipOnly,
+          locked: !!r.locked,
+          slow_mode: !!r.slowMode,
+          pinned_id: r.pinnedId || null,
+        });
+      } catch (e) {}
+    }
+
+    async function pullAllFromSupabase() {
+      if (!sbClient) return;
+      try {
+        const [uRes, rRes, mRes] = await Promise.all([
+          sbClient.from('chat_users').select('*'),
+          sbClient.from('chat_rooms').select('*'),
+          sbClient.from('chat_messages').select('*').order('created_at', { ascending: true }),
+        ]);
+
+        if (uRes.data && uRes.data.length > 0) {
+          uRes.data.forEach((row) => {
+            const mapped = {
+              id: row.id,
+              username: row.username,
+              password: row.password,
+              name: row.name,
+              avatar: row.avatar || row.name.charAt(0),
+              color: row.color || 'from-indigo-500 to-cyan-500',
+              photoUrl: row.photo_url || null,
+              status: row.status || 'online',
+              customStatus: row.custom_status || '',
+              roleType: row.role_type || 'member',
+              title: row.title || 'عضو',
+              bio: row.bio || '',
+              vipFrame: !!row.vip_frame,
+              muted: !!row.muted,
+            };
+            const idx = state.users.findIndex((x) => x.id === mapped.id || x.username === mapped.username);
+            if (idx >= 0) state.users[idx] = { ...state.users[idx], ...mapped };
+            else state.users.push(mapped);
+          });
+        }
+
+        if (rRes.data && rRes.data.length > 0) {
+          rRes.data.forEach((row) => {
+            const mapped = {
+              id: row.id,
+              type: row.type || 'channel',
+              name: row.name,
+              desc: row.description || '',
+              vipOnly: !!row.vip_only,
+              locked: !!row.locked,
+              slowMode: !!row.slow_mode,
+              pinnedId: row.pinned_id || null,
+              unread: 0,
+            };
+            const idx = state.rooms.findIndex((x) => x.id === mapped.id);
+            if (idx >= 0) state.rooms[idx] = { ...state.rooms[idx], ...mapped };
+            else state.rooms.push(mapped);
+          });
+        }
+
+        if (mRes.data) {
+          mRes.data.forEach((row) => {
+            if (!row.room_id) return;
+            if (!state.messages[row.room_id]) state.messages[row.room_id] = [];
+            const mappedMsg = {
+              id: row.id,
+              senderId: row.sender_id,
+              text: row.text || '',
+              ts: row.created_at ? new Date(row.created_at).getTime() : Date.now(),
+              reactions: row.reactions || {},
+              replyTo: row.reply_to || null,
+              edited: !!row.edited,
+              isVipShout: !!row.is_vip_shout,
+              poll: row.poll || null,
+              attachment: row.attachment || null,
+            };
+            const idx = state.messages[row.room_id].findIndex((m) => m.id === mappedMsg.id);
+            if (idx >= 0) state.messages[row.room_id][idx] = mappedMsg;
+            else state.messages[row.room_id].push(mappedMsg);
+          });
+        }
+
+        saveState();
+        if (getCurrentUser()) renderAll(false);
+      } catch (e) {}
+    }
+
+    function initSupabase(url) {
+      const targetUrl = (url || window.NOVACHAT_SUPABASE_URL || '').trim();
+      const targetKey = window.NOVACHAT_SUPABASE_KEY;
+      if (!targetUrl || !targetUrl.startsWith('https://') || !window.supabase) return false;
+      try {
+        sbClient = window.supabase.createClient(targetUrl, targetKey);
+        window.NOVACHAT_SUPABASE_URL = targetUrl;
+        pullAllFromSupabase();
+
+        sbClient.channel('public:novachat_sync')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_messages' }, () => pullAllFromSupabase())
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_users' }, () => pullAllFromSupabase())
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_rooms' }, () => pullAllFromSupabase())
+          .subscribe();
+
+        clearInterval(sbPollTimer);
+        sbPollTimer = setInterval(pullAllFromSupabase, 4000);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    async function syncMessageToSupabase(roomId, msg) {
+      if (!sbClient) return;
+      try {
+        const sender = getUser(msg.senderId);
+        await syncUserToSupabase(sender);
+        const room = state.rooms.find((r) => r.id === roomId);
+        if (room && room.type === 'channel') await syncRoomToSupabase(room);
+        await sbClient.from('chat_messages').upsert({
+          id: msg.id,
+          room_id: roomId,
+          sender_id: msg.senderId,
+          text: msg.text || '',
+          reactions: msg.reactions || {},
+          reply_to: msg.replyTo || null,
+          edited: !!msg.edited,
+          is_vip_shout: !!msg.isVipShout,
+          poll: msg.poll || null,
+          attachment: msg.attachment || null,
+        });
+      } catch (e) {}
+    }
+
+    async function deleteMessageFromSupabase(msgId) {
+      if (!sbClient) return;
+      try { await sbClient.from('chat_messages').delete().eq('id', msgId); } catch (e) {}
+    }
+
+    let mobilePreviewMode = false;
+
+    function deleteUserCompletely(userId) {
+      const me = getCurrentUser();
+      if (!isSuperAdmin(me) || userId === me.id) return;
+      const target = getUser(userId);
+      if (!target || target.roleType === 'superadmin') return;
+      state.users = state.users.filter((u) => u.id !== userId);
+      state.rooms = state.rooms.filter((r) => !(r.type === 'dm' && r.userId === userId));
+      Object.keys(state.messages).forEach((rid) => {
+        state.messages[rid] = state.messages[rid].filter((m) => m.senderId !== userId);
+      });
+      if (!state.rooms.some((r) => r.id === state.activeRoomId)) {
+        state.activeRoomId = 'ch_general';
+      }
+      saveState();
+      renderAll(false);
+      renderAdminUsersList();
+      showToast(`کاربر «${target.name}» به طور کامل حذف شد`, 'info');
+    }
+
+    function renderAdminUsersList() {
+      const list = $('admin-users-list');
+      if (!list) return;
+      const me = getCurrentUser();
+      list.innerHTML = state.users
+        .filter((u) => u.id !== me.id && !u.isBot)
+        .map((u) => `
+          <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/80">
+            <div class="flex items-center gap-2 min-w-0">
+              <div class="w-7 h-7 rounded-full bg-gradient-to-tr ${u.color} flex items-center justify-center text-white font-bold text-[10px] shrink-0">${escapeHtml(u.avatar)}</div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-1 flex-wrap">
+                  <span class="font-semibold truncate">${escapeHtml(u.name)}</span>
+                  ${getRoleBadgeHtml(u.roleType)}
+                </div>
+                <div class="text-[10px] text-slate-400">@${escapeHtml(u.username)} ${u.muted ? '• سکوت‌شده' : ''}</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 shrink-0">
+              <button data-admin-act="toggle-mod" data-uid="${u.id}" title="مدیر معمولی" class="px-2 py-1 rounded-lg text-[10px] font-bold ${u.roleType === 'admin' ? 'bg-sky-500 text-white' : 'bg-sky-500/15 text-sky-500'}">مدیر</button>
+              <button data-admin-act="toggle-vip" data-uid="${u.id}" title="VIP" class="px-2 py-1 rounded-lg text-[10px] font-bold ${u.roleType === 'vip' ? 'bg-amber-500 text-white' : 'bg-amber-500/15 text-amber-500'}">VIP</button>
+              <button data-admin-act="delete-user" data-uid="${u.id}" title="حذف کامل" class="px-2 py-1 rounded-lg text-[10px] font-bold bg-rose-500/15 text-rose-500 hover:bg-rose-500 hover:text-white transition">حذف</button>
+            </div>
+          </div>
+        `).join('') || '<p class="text-center text-slate-400 py-4">کاربر دیگری ثبت نشده است.</p>';
+    }
+
+    // ==================== EVENT LISTENERS ====================
+    function initEvents() {
+      // Auth Tabs & Forms
+      $('tab-auth-login').addEventListener('click', () => {
+        $('tab-auth-login').className = 'py-2.5 rounded-xl bg-indigo-600 text-white transition';
+        $('tab-auth-register').className = 'py-2.5 rounded-xl text-slate-400 hover:text-white transition';
+        $('form-login').classList.remove('hidden');
+        $('form-register').classList.add('hidden');
+      });
+      $('tab-auth-register').addEventListener('click', () => {
+        $('tab-auth-register').className = 'py-2.5 rounded-xl bg-emerald-600 text-white transition';
+        $('tab-auth-login').className = 'py-2.5 rounded-xl text-slate-400 hover:text-white transition';
+        $('form-register').classList.remove('hidden');
+        $('form-login').classList.add('hidden');
+      });
+
+      $('form-register').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = $('reg-name').value.trim();
+        const username = $('reg-username').value.trim().toLowerCase();
+        const password = $('reg-password').value;
+        if (!name || !username || password.length < 4) {
+          showToast('لطفاً تمام فیلدها را کامل وارد کنید (رمز حداقل ۴ کاراکتر)', 'error');
+          return;
+        }
+        if (state.users.some((u) => u.username === username)) {
+          showToast('این نام کاربری قبلاً ثبت شده است', 'error');
+          return;
+        }
+        const newUser = {
+          id: 'u_' + Date.now(),
+          username,
+          password,
+          name,
+          avatar: name.charAt(0),
+          color: 'from-cyan-500 to-blue-500',
+          status: 'online',
+          roleType: 'member',
+          title: 'عضو جدید',
+          bio: 'عضو تازه‌وارد چت‌روم آوا چت',
+          muted: false,
+        };
+        state.users.push(newUser);
+        syncUserToSupabase(newUser);
+        saveState();
+        $('reg-name').value = '';
+        $('reg-username').value = '';
+        $('reg-password').value = '';
+        $('login-username').value = username;
+        $('tab-auth-login').click();
+        showToast('ثبت‌نام موفق بود! حالا وارد شوید', 'success');
+      });
+
+      $('form-login').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const username = $('login-username').value.trim().toLowerCase();
+        const password = $('login-password').value;
+        const user = state.users.find((u) => u.username === username && u.password === password);
+        if (!user) {
+          showToast('نام کاربری یا رمز عبور اشتباه است', 'error');
+          return;
+        }
+        loginAs(user);
+      });
+
+      $('btn-quick-superadmin').addEventListener('click', () => loginAs(getUser('u_owner')));
+      $('btn-quick-mod').addEventListener('click', () => loginAs(getUser('u_mod')));
+      $('btn-quick-vip').addEventListener('click', () => loginAs(getUser('u_sara')));
+
+      $('btn-logout').addEventListener('click', () => {
+        state.currentUserId = null;
+        saveState();
+        renderAuthOrApp();
+        showToast('از حساب خود خارج شدید', 'info');
+      });
+
+      // Theme & Sound
+      $('btn-theme-toggle').addEventListener('click', () => {
+        state.theme = state.theme === 'dark' ? 'light' : 'dark';
+        saveState();
+        applyTheme();
+      });
+
+      $('btn-sound-toggle').addEventListener('click', () => {
+        soundEnabled = !soundEnabled;
+        $('icon-sound-on').classList.toggle('hidden', !soundEnabled);
+        $('icon-sound-off').classList.toggle('hidden', soundEnabled);
+        showToast(soundEnabled ? 'صدای اعلان روشن شد' : 'صدای اعلان خاموش شد');
+      });
+
+      // Sidebars
+      $('btn-open-left').addEventListener('click', () => {
+        $('left-sidebar').classList.remove('translate-x-full');
+        $('sidebar-backdrop').classList.remove('hidden');
+      });
+      $('btn-close-left').addEventListener('click', closeMobileSidebars);
+      $('sidebar-backdrop').addEventListener('click', closeMobileSidebars);
+
+      $('btn-toggle-right').addEventListener('click', () => {
+        const right = $('right-sidebar');
+        right.classList.toggle('hidden');
+        right.classList.toggle('flex');
+      });
+      $('btn-close-right').addEventListener('click', () => {
+        $('right-sidebar').classList.add('hidden');
+        $('right-sidebar').classList.remove('flex');
+      });
+
+      document.querySelectorAll('.rtab-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          activeRightTab = btn.dataset.rtab;
+          document.querySelectorAll('.rtab-btn').forEach((b) => {
+            const active = b.dataset.rtab === activeRightTab;
+            b.className = `rtab-btn py-1.5 rounded-lg font-medium transition ${active ? 'bg-indigo-500/10 text-indigo-500' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'}`;
+          });
+          renderRightPanel();
+        });
+      });
+
+      $('left-sidebar').addEventListener('click', (e) => {
+        const btn = e.target.closest('.room-item');
+        if (btn && btn.dataset.roomId) selectRoom(btn.dataset.roomId);
+      });
+
+      $('room-search-input').addEventListener('input', (e) => {
+        roomSearchQuery = e.target.value;
+        renderSidebar();
+      });
+
+      $('btn-toggle-msg-search').addEventListener('click', () => {
+        const bar = $('msg-search-bar');
+        bar.classList.toggle('hidden');
+        if (!bar.classList.contains('hidden')) $('msg-search-input').focus();
+        else {
+          msgSearchQuery = '';
+          $('msg-search-input').value = '';
+          renderMessages(true);
+        }
+      });
+      $('btn-close-msg-search').addEventListener('click', () => {
+        $('msg-search-bar').classList.add('hidden');
+        msgSearchQuery = '';
+        $('msg-search-input').value = '';
+        renderMessages(true);
+      });
+      $('msg-search-input').addEventListener('input', (e) => {
+        msgSearchQuery = e.target.value;
+        renderMessages(false);
+      });
+
+      $('btn-jump-pinned').addEventListener('click', () => {
+        const room = getActiveRoom();
+        if (room.pinnedId) jumpToMessage(room.pinnedId);
+      });
+      $('btn-unpin-banner').addEventListener('click', () => {
+        const room = getActiveRoom();
+        if (room.pinnedId) togglePin(room.pinnedId);
+      });
+
+      // Message & Poll & Voice delegation
+      $('messages-container').addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        const action = btn.dataset.action;
+        const msgId = btn.dataset.msgId;
+        const me = getCurrentUser();
+        if (action === 'react') toggleReaction(msgId, btn.dataset.emoji);
+        else if (action === 'pin') togglePin(msgId);
+        else if (action === 'jump') jumpToMessage(btn.dataset.targetId);
+        else if (action === 'view-user') openUserCard(btn.dataset.userId);
+        else if (action === 'open-vip-modal') openVipModal();
+        else if (action === 'copy') {
+          const msgs = state.messages[state.activeRoomId] || [];
+          const msg = msgs.find((m) => m.id === msgId);
+          if (msg && msg.text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(msg.text).catch(() => {});
+            } else {
+              const ta = document.createElement('textarea');
+              ta.value = msg.text;
+              document.body.appendChild(ta);
+              ta.select();
+              try { document.execCommand('copy'); } catch (err) {}
+              ta.remove();
+            }
+            showToast('متن پیام کپی شد', 'success');
+          }
+        } else if (action === 'vote') {
+          const msgs = state.messages[state.activeRoomId] || [];
+          const msg = msgs.find((m) => m.id === msgId);
+          if (!msg || !msg.poll || !me) return;
+          const optId = btn.dataset.optId;
+          msg.poll.options.forEach((o) => {
+            o.votes = o.votes.filter((uid) => uid !== me.id);
+            if (o.id === optId) o.votes.push(me.id);
+          });
+          saveState();
+          renderMessages(false);
+          showToast('رای شما ثبت شد', 'success');
+        } else if (action === 'play-voice') {
+          playNotificationSound();
+          showToast('در حال پخش پیام صوتی... 🎧', 'info');
+        } else if (action === 'reply') {
+          editTargetId = null;
+          replyTargetId = msgId;
+          updateComposerContext();
+          $('message-input').focus();
+        } else if (action === 'edit') {
+          const msgs = state.messages[state.activeRoomId] || [];
+          const msg = msgs.find((m) => m.id === msgId);
+          if (!msg) return;
+          replyTargetId = null;
+          editTargetId = msgId;
+          $('message-input').value = msg.text;
+          updateComposerContext();
+          $('message-input').focus();
+        } else if (action === 'delete') {
+          deleteTargetId = msgId;
+          $('modal-confirm-delete').classList.remove('hidden');
+          $('modal-confirm-delete').classList.add('flex');
+        }
+      });
+
+      $('right-panel-content').addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        if (btn.dataset.action === 'jump') jumpToMessage(btn.dataset.targetId);
+        else if (btn.dataset.action === 'view-user') openUserCard(btn.dataset.userId);
+      });
+
+      $('btn-cancel-context').addEventListener('click', () => {
+        replyTargetId = null;
+        editTargetId = null;
+        updateComposerContext();
+      });
+
+      $('btn-send').addEventListener('click', sendMessage);
+      $('message-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+      $('message-input').addEventListener('input', (e) => {
+        e.target.style.height = 'auto';
+        e.target.style.height = Math.min(e.target.scrollHeight, 128) + 'px';
+      });
+
+      // Voice message quick send
+      $('btn-voice-msg').addEventListener('click', () => {
+        const me = getCurrentUser();
+        if (!me || me.muted) { showToast('امکان ارسال پیام صوتی ندارید', 'error'); return; }
+        const room = getActiveRoom();
+        if (room.locked && !isSuperAdmin(me)) { showToast('کانال قفل است', 'error'); return; }
+        if (!state.messages[room.id]) state.messages[room.id] = [];
+        state.messages[room.id].push({
+          id: 'm_v_' + Date.now(),
+          senderId: me.id,
+          text: 'پیام صوتی',
+          ts: Date.now(),
+          reactions: {},
+          replyTo: null,
+          edited: false,
+          isVipShout: false,
+          voice: { duration: '0:08' },
+        });
+        saveState();
+        renderAll(true);
+        showToast('پیام صوتی ارسال شد 🎙️', 'success');
+      });
+
+      // Live Poll modal
+      const closePoll = () => {
+        $('modal-poll').classList.add('hidden');
+        $('modal-poll').classList.remove('flex');
+      };
+      $('btn-open-poll').addEventListener('click', () => {
+        $('poll-question').value = '';
+        $('poll-opt-1').value = '';
+        $('poll-opt-2').value = '';
+        $('poll-opt-3').value = '';
+        $('modal-poll').classList.remove('hidden');
+        $('modal-poll').classList.add('flex');
+      });
+      $('btn-close-poll').addEventListener('click', closePoll);
+      $('btn-cancel-poll').addEventListener('click', closePoll);
+      $('btn-submit-poll').addEventListener('click', () => {
+        const q = $('poll-question').value.trim();
+        const o1 = $('poll-opt-1').value.trim();
+        const o2 = $('poll-opt-2').value.trim();
+        const o3 = $('poll-opt-3').value.trim();
+        if (!q || !o1 || !o2) {
+          showToast('سوال و حداقل ۲ گزینه الزامی است', 'error');
+          return;
+        }
+        const options = [
+          { id: 'o1', text: o1, votes: [] },
+          { id: 'o2', text: o2, votes: [] },
+        ];
+        if (o3) options.push({ id: 'o3', text: o3, votes: [] });
+        const room = getActiveRoom();
+        if (!state.messages[room.id]) state.messages[room.id] = [];
+        state.messages[room.id].push({
+          id: 'm_p_' + Date.now(),
+          senderId: getCurrentUser().id,
+          text: q,
+          ts: Date.now(),
+          reactions: {},
+          replyTo: null,
+          edited: false,
+          isVipShout: false,
+          poll: { question: q, options },
+        });
+        saveState();
+        closePoll();
+        renderAll(true);
+        showToast('نظرسنجی ارسال شد 📊', 'success');
+      });
+
+      // Mobile Preview Toggle & Mobile Bottom Nav
+      $('btn-mobile-preview').addEventListener('click', () => {
+        mobilePreviewMode = !mobilePreviewMode;
+        const shell = $('app-shell');
+        if (mobilePreviewMode) {
+          shell.classList.add('max-w-[410px]', 'mx-auto', 'my-2', 'rounded-3xl', 'border-4', 'border-slate-700', 'shadow-2xl');
+          showToast('حالت شبیه‌ساز گوشی فعال شد 📱', 'info');
+        } else {
+          shell.classList.remove('max-w-[410px]', 'mx-auto', 'my-2', 'rounded-3xl', 'border-4', 'border-slate-700', 'shadow-2xl');
+          showToast('نمای دسکتاپ فعال شد 🖥️', 'info');
+        }
+      });
+
+      $('mnav-chat').addEventListener('click', () => {
+        closeMobileSidebars();
+        $('right-sidebar').classList.add('hidden');
+        $('right-sidebar').classList.remove('flex');
+      });
+      $('mnav-rooms').addEventListener('click', () => {
+        $('left-sidebar').classList.remove('translate-x-full');
+        $('sidebar-backdrop').classList.remove('hidden');
+      });
+      $('mnav-members').addEventListener('click', () => {
+        closeMobileSidebars();
+        $('right-sidebar').classList.remove('hidden');
+        $('right-sidebar').classList.add('flex');
+      });
+      $('mnav-vip').addEventListener('click', openVipModal);
+
+      // Admin Panel Tabs & User Management
+      $('tab-admin-users').addEventListener('click', () => {
+        $('tab-admin-users').className = 'py-2 rounded-lg bg-rose-600 text-white transition';
+        $('tab-admin-room').className = 'py-2 rounded-lg text-slate-500 dark:text-slate-300 transition';
+        $('admin-tab-users-body').classList.remove('hidden');
+        $('admin-tab-room-body').classList.add('hidden');
+      });
+      $('tab-admin-room').addEventListener('click', () => {
+        $('tab-admin-room').className = 'py-2 rounded-lg bg-rose-600 text-white transition';
+        $('tab-admin-users').className = 'py-2 rounded-lg text-slate-500 dark:text-slate-300 transition';
+        $('admin-tab-room-body').classList.remove('hidden');
+        $('admin-tab-users-body').classList.add('hidden');
+      });
+
+      $('btn-admin-create-user').addEventListener('click', () => {
+        if (!isSuperAdmin(getCurrentUser())) return;
+        const name = $('admin-add-name').value.trim();
+        const username = $('admin-add-username').value.trim().toLowerCase();
+        const password = $('admin-add-password').value.trim() || '1234';
+        const roleType = $('admin-add-role').value;
+        if (!name || !username) {
+          showToast('نام نمایشی و نام کاربری الزامی است', 'error');
+          return;
+        }
+        if (state.users.some((u) => u.username === username)) {
+          showToast('این نام کاربری از قبل وجود دارد', 'error');
+          return;
+        }
+        const titleMap = { member: 'عضو عادی', vip: 'عضو ویژه VIP', admin: 'مدیر معمولی' };
+        const colorMap = { member: 'from-emerald-500 to-teal-500', vip: 'from-amber-400 to-orange-500', admin: 'from-sky-500 to-indigo-600' };
+        const newU = {
+          id: 'u_' + Date.now(),
+          username,
+          password,
+          name,
+          avatar: name.charAt(0),
+          color: colorMap[roleType] || 'from-indigo-500 to-cyan-500',
+          status: 'online',
+          roleType,
+          title: titleMap[roleType] || 'عضو',
+          bio: 'افزوده‌شده توسط مدیر اصلی',
+          muted: false,
+        };
+        state.users.push(newU);
+        syncUserToSupabase(newU);
+        saveState();
+        $('admin-add-name').value = '';
+        $('admin-add-username').value = '';
+        $('admin-add-password').value = '';
+        renderAll(false);
+        renderAdminUsersList();
+        showToast(`کاربر «${name}» اضافه شد`, 'success');
+      });
+
+      $('admin-users-list').addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-admin-act]');
+        if (!btn || !isSuperAdmin(getCurrentUser())) return;
+        const act = btn.dataset.adminAct;
+        const uid = btn.dataset.uid;
+        const u = getUser(uid);
+        if (!u) return;
+        if (act === 'toggle-mod') {
+          u.roleType = u.roleType === 'admin' ? 'member' : 'admin';
+          saveState();
+          renderAll(false);
+          renderAdminUsersList();
+          showToast('نقش کاربر به‌روزرسانی شد', 'success');
+        } else if (act === 'toggle-vip') {
+          u.roleType = u.roleType === 'vip' ? 'member' : 'vip';
+          saveState();
+          renderAll(false);
+          renderAdminUsersList();
+          showToast('وضعیت VIP کاربر به‌روزرسانی شد', 'vip');
+        } else if (act === 'delete-user') {
+          deleteUserCompletely(uid);
+        }
+      });
+
+      $('btn-uc-delete-user').addEventListener('click', () => {
+        if (!selectedProfileUserId) return;
+        const uid = selectedProfileUserId;
+        selectedProfileUserId = null;
+        $('modal-user-card').classList.add('hidden');
+        $('modal-user-card').classList.remove('flex');
+        deleteUserCompletely(uid);
+      });
+
+      // Super Admin Control Panel
+      const closeAdminPanel = () => {
+        $('modal-admin-panel').classList.add('hidden');
+        $('modal-admin-panel').classList.remove('flex');
+      };
+      $('btn-open-admin-panel').addEventListener('click', () => {
+        if (!isSuperAdmin(getCurrentUser())) return;
+        const room = getActiveRoom();
+        $('admin-edit-room-name').value = room.name;
+        $('admin-edit-room-desc').value = room.desc || '';
+        renderAdminUsersList();
+        $('modal-admin-panel').classList.remove('hidden');
+        $('modal-admin-panel').classList.add('flex');
+      });
+      $('btn-close-admin-panel').addEventListener('click', closeAdminPanel);
+      $('btn-admin-connect-sb').addEventListener('click', () => {
+        const url = $('admin-sb-url').value.trim();
+        if (!url.startsWith('https://')) {
+          showToast('آدرس پروژه Supabase باید با https:// شروع شود', 'error');
+          return;
+        }
+        state.supabaseUrl = url;
+        saveState();
+        const ok = initSupabase(url);
+        $('sb-conn-status').textContent = ok ? 'متصل به Supabase ✅' : 'خطا در اتصال';
+        showToast(ok ? 'اتصال به Supabase برقرار شد ✅' : 'خطا در برقراری اتصال', ok ? 'success' : 'error');
+      });
+
+      $('btn-toggle-room-lock').addEventListener('click', () => {
+        const room = getActiveRoom();
+        room.locked = !room.locked;
+        saveState();
+        renderAll(false);
+        showToast(room.locked ? 'اتاق قفل شد 🔒' : 'قفل اتاق باز شد 🔓', 'info');
+      });
+      $('btn-toggle-slow-mode').addEventListener('click', () => {
+        const room = getActiveRoom();
+        room.slowMode = !room.slowMode;
+        saveState();
+        renderAll(false);
+        showToast(room.slowMode ? 'حالت آهسته فعال شد 🐢' : 'حالت آهسته غیرفعال شد', 'info');
+      });
+      $('btn-admin-save-room').addEventListener('click', () => {
+        const room = getActiveRoom();
+        const name = $('admin-edit-room-name').value.trim();
+        if (name) room.name = name;
+        room.desc = $('admin-edit-room-desc').value.trim();
+        saveState();
+        closeAdminPanel();
+        renderAll(false);
+        showToast('تغییرات اتاق ذخیره شد', 'success');
+      });
+      $('btn-admin-delete-room').addEventListener('click', () => {
+        const room = getActiveRoom();
+        if (room.id === 'ch_general') {
+          showToast('کانال عمومی قابل حذف نیست', 'error');
+          return;
+        }
+        state.rooms = state.rooms.filter((r) => r.id !== room.id);
+        delete state.messages[room.id];
+        state.activeRoomId = 'ch_general';
+        saveState();
+        closeAdminPanel();
+        renderAll(true);
+        showToast('کانال حذف شد', 'info');
+      });
+
+      // VIP Shout toggle
+      $('btn-vip-shout').addEventListener('click', () => {
+        const me = getCurrentUser();
+        if (!hasVipAccess(me)) {
+          openVipModal();
+          return;
+        }
+        vipShoutMode = !vipShoutMode;
+        renderProfileFooter();
+        showToast(vipShoutMode ? 'حالت پیام ویژه طلایی فعال شد ✨' : 'حالت پیام عادی', vipShoutMode ? 'vip' : 'info');
+      });
+
+      // Emoji picker
+      $('btn-emoji').addEventListener('click', (e) => {
+        e.stopPropagation();
+        $('emoji-picker').classList.toggle('hidden');
+      });
+      $('emoji-picker').addEventListener('click', (e) => {
+        const btn = e.target.closest('.emoji-opt');
+        if (!btn) return;
+        if (btn.dataset.vipEmoji === 'true' && !hasVipAccess(getCurrentUser())) {
+          showToast('این ایموجی مخصوص اعضای VIP است', 'error');
+          openVipModal();
+          return;
+        }
+        const input = $('message-input');
+        input.value += btn.textContent;
+        input.focus();
+        $('emoji-picker').classList.add('hidden');
+      });
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('#emoji-picker') && !e.target.closest('#btn-emoji')) {
+          $('emoji-picker').classList.add('hidden');
+        }
+      });
+
+      // File attachment
+      $('btn-attach').addEventListener('click', () => $('file-input').click());
+      $('file-input').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const maxMB = hasVipAccess(getCurrentUser()) ? 10 : 2;
+        if (file.size > maxMB * 1024 * 1024) {
+          showToast(`حداکثر حجم فایل مجاز ${maxMB} مگابایت است`, 'error');
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = () => {
+          const isImage = file.type.startsWith('image/');
+          const sizeKB = Math.max(1, Math.round(file.size / 1024)) + ' KB';
+          pendingAttachment = { name: file.name, size: sizeKB, isImage, dataUrl: reader.result };
+          $('attachment-name').textContent = file.name;
+          $('attachment-size').textContent = sizeKB;
+          $('attachment-preview-bar').classList.remove('hidden');
+          if (isImage) {
+            $('attachment-thumb').src = reader.result;
+            $('attachment-thumb').classList.remove('hidden');
+            $('attachment-file-icon').classList.add('hidden');
+          } else {
+            $('attachment-thumb').classList.add('hidden');
+            $('attachment-file-icon').classList.remove('hidden');
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+      $('btn-remove-attachment').addEventListener('click', clearAttachment);
+
+      // New Channel (Super Admin Only)
+      const closeChannelModal = () => {
+        $('modal-new-channel').classList.add('hidden');
+        $('modal-new-channel').classList.remove('flex');
+      };
+      $('btn-new-channel').addEventListener('click', () => {
+        if (!isSuperAdmin(getCurrentUser())) return;
+        $('input-channel-name').value = '';
+        $('input-channel-desc').value = '';
+        $('modal-new-channel').classList.remove('hidden');
+        $('modal-new-channel').classList.add('flex');
+        $('input-channel-name').focus();
+      });
+      $('btn-close-modal-channel').addEventListener('click', closeChannelModal);
+      $('btn-cancel-channel').addEventListener('click', closeChannelModal);
+      $('btn-create-channel').addEventListener('click', () => {
+        const name = $('input-channel-name').value.trim().replace(/\s+/g, '-');
+        const desc = $('input-channel-desc').value.trim() || 'کانال گفتگوی جدید';
+        if (!name) { showToast('نام کانال را وارد کنید', 'error'); return; }
+        const id = 'ch_' + Date.now();
+        state.rooms.push({ id, type: 'channel', name, desc, unread: 0, pinnedId: null, vipOnly: false, locked: false, slowMode: false });
+        state.messages[id] = [
+          { id: 'm_' + Date.now(), senderId: 'u_bot', text: `کانال **#${name}** توسط مدیر اصلی ایجاد شد 🎉`, ts: Date.now(), reactions: {}, replyTo: null, edited: false, isVipShout: false }
+        ];
+        closeChannelModal();
+        selectRoom(id);
+        showToast(`کانال #${name} ساخته شد`, 'success');
+      });
+
+      // My Profile
+      const closeProfileModal = () => {
+        $('modal-profile').classList.add('hidden');
+        $('modal-profile').classList.remove('flex');
+      };
+      let tempPhotoUrl = null;
+
+      function refreshProfilePreview(me) {
+        const prev = $('profile-preview-avatar');
+        const tempUser = { ...me, photoUrl: tempPhotoUrl, color: $('input-profile-color').value, vipFrame: $('input-profile-vip-frame').checked };
+        prev.innerHTML = renderAvatarInner(tempUser);
+        prev.className = `w-14 h-14 rounded-full bg-gradient-to-tr ${tempUser.color} ${getAvatarRingClass(tempUser)} flex items-center justify-center text-white font-bold text-lg overflow-hidden shrink-0`;
+      }
+
+      $('btn-open-profile').addEventListener('click', () => {
+        const me = getCurrentUser();
+        tempPhotoUrl = me.photoUrl || null;
+        $('profile-modal-role-badge').innerHTML = getRoleBadgeHtml(me.roleType);
+        $('input-profile-name').value = me.name;
+        $('input-profile-bio').value = me.bio || '';
+        $('input-profile-status').value = me.status;
+        $('input-profile-color').value = me.color || 'from-indigo-500 to-cyan-500';
+        $('input-profile-custom-status').value = me.customStatus || '';
+        $('input-profile-vip-frame').checked = !!me.vipFrame;
+        $('input-profile-title').value = me.title || '';
+
+        $('profile-vip-options').classList.toggle('hidden', !hasVipAccess(me));
+        $('profile-mod-options').classList.toggle('hidden', !isSuperAdmin(me) && !isRegularAdmin(me));
+
+        refreshProfilePreview(me);
+        $('modal-profile').classList.remove('hidden');
+        $('modal-profile').classList.add('flex');
+        refreshIcons();
+      });
+      $('btn-upload-photo').addEventListener('click', () => $('input-profile-photo').click());
+      $('input-profile-photo').addEventListener('change', (e) => {
+        const f = e.target.files[0];
+        if (!f) return;
+        const r = new FileReader();
+        r.onload = () => {
+          tempPhotoUrl = r.result;
+          refreshProfilePreview(getCurrentUser());
+        };
+        r.readAsDataURL(f);
+      });
+      $('btn-remove-photo').addEventListener('click', () => {
+        tempPhotoUrl = null;
+        $('input-profile-photo').value = '';
+        refreshProfilePreview(getCurrentUser());
+      });
+      $('input-profile-color').addEventListener('change', () => refreshProfilePreview(getCurrentUser()));
+      $('input-profile-vip-frame').addEventListener('change', () => refreshProfilePreview(getCurrentUser()));
+      $('btn-close-modal-profile').addEventListener('click', closeProfileModal);
+      $('btn-cancel-profile').addEventListener('click', closeProfileModal);
+      $('btn-save-profile').addEventListener('click', () => {
+        const name = $('input-profile-name').value.trim();
+        if (!name) { showToast('نام نمایشی نمی‌تواند خالی باشد', 'error'); return; }
+        const me = getCurrentUser();
+        me.name = name;
+        me.avatar = name.charAt(0);
+        me.bio = $('input-profile-bio').value.trim();
+        me.status = $('input-profile-status').value;
+        me.color = $('input-profile-color').value;
+        me.photoUrl = tempPhotoUrl;
+        if (hasVipAccess(me)) {
+          me.customStatus = $('input-profile-custom-status').value.trim();
+          me.vipFrame = $('input-profile-vip-frame').checked;
+        }
+        if (isSuperAdmin(me) || isRegularAdmin(me)) {
+          me.title = $('input-profile-title').value.trim() || me.title;
+        }
+        syncUserToSupabase(me);
+        saveState();
+        closeProfileModal();
+        renderAll(false);
+        showToast('پروفایل با موفقیت ذخیره شد', 'success');
+      });
+
+      // ==================== VOICE CALL ENGINE ====================
+      let vcInterval = null;
+      let vcSeconds = 0;
+      let vcMuted = false;
+      let vcSpeaker = true;
+      let vcStream = null;
+
+      function formatCallTimer(sec) {
+        const m = String(Math.floor(sec / 60)).padStart(2, '0');
+        const sc = String(sec % 60).padStart(2, '0');
+        return `${m}:${sc}`;
+      }
+
+      async function startVoiceCall() {
+        const room = getActiveRoom();
+        const me = getCurrentUser();
+        if (!me || me.muted) { showToast('امکان برقراری تماس ندارید', 'error'); return; }
+        vcSeconds = 0;
+        vcMuted = false;
+        vcSpeaker = true;
+        $('vc-mic-on').classList.remove('hidden');
+        $('vc-mic-off').classList.add('hidden');
+        $('vc-spk-on').classList.remove('hidden');
+        $('vc-spk-off').classList.add('hidden');
+        $('vc-title').textContent = room.type === 'dm' ? `تماس با ${room.name}` : `اتاق صوتی #${room.name}`;
+        $('vc-status').textContent = 'در حال برقراری تماس...';
+        $('vc-timer').textContent = '00:00';
+        const targetUser = room.type === 'dm' ? getUser(room.userId) : me;
+        $('vc-avatar').innerHTML = room.type === 'dm' ? renderAvatarInner(targetUser) : '<i data-lucide="headphones" class="w-8 h-8"></i>';
+        $('voice-call-modal').classList.remove('hidden');
+        $('voice-call-modal').classList.add('flex');
+        refreshIcons();
+        playNotificationSound();
+
+        try {
+          if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            vcStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          }
+        } catch (err) {
+          vcStream = null;
+        }
+
+        clearInterval(vcInterval);
+        setTimeout(() => {
+          if ($('voice-call-modal').classList.contains('hidden')) return;
+          $('vc-status').textContent = vcStream ? 'متصل شد (میکروفون فعال) 🎙️' : 'متصل شد (حالت شبیه‌ساز صوتی) 🎧';
+          playNotificationSound();
+          vcInterval = setInterval(() => {
+            vcSeconds++;
+            $('vc-timer').textContent = formatCallTimer(vcSeconds);
+          }, 1000);
+        }, 900);
+      }
+
+      function endVoiceCall() {
+        clearInterval(vcInterval);
+        vcInterval = null;
+        if (vcStream) {
+          vcStream.getTracks().forEach((t) => t.stop());
+          vcStream = null;
+        }
+        $('voice-call-modal').classList.add('hidden');
+        $('voice-call-modal').classList.remove('flex');
+        const room = getActiveRoom();
+        const me = getCurrentUser();
+        if (me && vcSeconds > 0) {
+          if (!state.messages[room.id]) state.messages[room.id] = [];
+          state.messages[room.id].push({
+            id: 'm_call_' + Date.now(),
+            senderId: me.id,
+            text: `📞 تماس صوتی به مدت **${formatCallTimer(vcSeconds)}** پایان یافت`,
+            ts: Date.now(),
+            reactions: {},
+            replyTo: null,
+            edited: false,
+            isVipShout: false,
+          });
+          saveState();
+          renderAll(true);
+        }
+        showToast('تماس صوتی پایان یافت', 'info');
+      }
+
+      $('btn-start-voice-call').addEventListener('click', startVoiceCall);
+      $('btn-vc-end').addEventListener('click', endVoiceCall);
+      $('btn-vc-mute').addEventListener('click', () => {
+        vcMuted = !vcMuted;
+        if (vcStream) vcStream.getAudioTracks().forEach((t) => { t.enabled = !vcMuted; });
+        $('vc-mic-on').classList.toggle('hidden', vcMuted);
+        $('vc-mic-off').classList.toggle('hidden', !vcMuted);
+        showToast(vcMuted ? 'میکروفون قطع شد' : 'میکروفون وصل شد', 'info');
+      });
+      $('btn-vc-speaker').addEventListener('click', () => {
+        vcSpeaker = !vcSpeaker;
+        $('vc-spk-on').classList.toggle('hidden', !vcSpeaker);
+        $('vc-spk-off').classList.toggle('hidden', vcSpeaker);
+      });
+
+      // User Card & Admin Actions
+      const closeUserCard = () => {
+        selectedProfileUserId = null;
+        $('modal-user-card').classList.add('hidden');
+        $('modal-user-card').classList.remove('flex');
+      };
+      $('btn-close-user-card').addEventListener('click', closeUserCard);
+      $('btn-uc-role-admin').addEventListener('click', () => {
+        if (!isSuperAdmin(getCurrentUser()) || !selectedProfileUserId) return;
+        const u = getUser(selectedProfileUserId);
+        u.roleType = u.roleType === 'admin' ? 'member' : 'admin';
+        saveState();
+        openUserCard(selectedProfileUserId);
+        renderAll(false);
+        showToast('نقش کاربر تغییر کرد', 'success');
+      });
+      $('btn-uc-role-vip').addEventListener('click', () => {
+        if (!isSuperAdmin(getCurrentUser()) || !selectedProfileUserId) return;
+        const u = getUser(selectedProfileUserId);
+        u.roleType = u.roleType === 'vip' ? 'member' : 'vip';
+        saveState();
+        openUserCard(selectedProfileUserId);
+        renderAll(false);
+        showToast('وضعیت VIP کاربر به‌روزرسانی شد', 'vip');
+      });
+      $('btn-uc-mute').addEventListener('click', () => {
+        const me = getCurrentUser();
+        if ((!isSuperAdmin(me) && !isRegularAdmin(me)) || !selectedProfileUserId) return;
+        const u = getUser(selectedProfileUserId);
+        if (u.roleType === 'superadmin') return;
+        u.muted = !u.muted;
+        saveState();
+        openUserCard(selectedProfileUserId);
+        renderAll(false);
+        showToast(u.muted ? 'کاربر سکوت شد' : 'سکوت کاربر برداشته شد', 'info');
+      });
+
+      // VIP Modal
+      const closeVipModal = () => {
+        $('modal-vip').classList.add('hidden');
+        $('modal-vip').classList.remove('flex');
+      };
+      $('btn-open-vip').addEventListener('click', openVipModal);
+      $('btn-header-vip').addEventListener('click', openVipModal);
+      $('btn-close-vip').addEventListener('click', closeVipModal);
+      $('btn-ok-vip').addEventListener('click', closeVipModal);
+
+      // Confirm Delete
+      const closeDeleteModal = () => {
+        deleteTargetId = null;
+        $('modal-confirm-delete').classList.add('hidden');
+        $('modal-confirm-delete').classList.remove('flex');
+      };
+      $('btn-cancel-delete').addEventListener('click', closeDeleteModal);
+      $('btn-confirm-delete').addEventListener('click', () => {
+        if (!deleteTargetId) return;
+        const room = getActiveRoom();
+        state.messages[room.id] = (state.messages[room.id] || []).filter((m) => m.id !== deleteTargetId);
+        deleteMessageFromSupabase(deleteTargetId);
+        if (room.pinnedId === deleteTargetId) room.pinnedId = null;
+        saveState();
+        closeDeleteModal();
+        renderAll(false);
+        showToast('پیام حذف شد', 'info');
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initSupabase(state.supabaseUrl || window.NOVACHAT_SUPABASE_URL);
+      initEvents();
+      renderAuthOrApp();
+    });
+  </script>
+</body>
+</html>
